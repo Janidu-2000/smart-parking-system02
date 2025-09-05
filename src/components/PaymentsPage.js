@@ -1,13 +1,16 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Download, Search, FileText, Eye, X } from 'lucide-react';
 import { updateBookingStatusInFirestore } from '../services/bookingService';
 import { updateSlotStatus } from '../services/slotService';
 import { doc, updateDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+import { useResponsive, getResponsiveStyles, getTabStyles } from '../utils/responsive';
 
 const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) => {
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024);
+  const screenSize = useResponsive();
+  const responsiveStyles = getResponsiveStyles(screenSize);
+  const tabStyles = getTabStyles(screenSize);
+  
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [sortBy, setSortBy] = useState('date');
@@ -17,17 +20,6 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [showBillModal, setShowBillModal] = useState(false);
   const [selectedReservation, setSelectedReservation] = useState(null);
-
-  // Responsive breakpoint handling
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-      setIsTablet(window.innerWidth <= 1024);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   // Modal handling functions
   const handleViewFullRecord = (payment) => {
@@ -95,28 +87,28 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         console.warn('⚠️ Process button not found');
       }
 
-      // Step 1: Update booking status to null in Firebase
+      // Step 1: Update booking status to 'completed' (paid) in Firebase
       const bookingId = selectedReservation.id || selectedReservation.bookingId || selectedReservation._id;
       
       if (bookingId) {
-        console.log('🔄 Updating booking status to null for ID:', bookingId);
+        console.log('🔄 Updating booking status to completed for ID:', bookingId);
         
         try {
-          // Direct Firebase update for booking - set status to null
+          // Direct Firebase update for booking
           const bookingRef = doc(db, 'bookings', bookingId);
           await updateDoc(bookingRef, {
-            status: null,
+            status: 'completed',
             checkOutTime: new Date().toISOString(),
             paymentCompleted: true,
             paymentDate: serverTimestamp(),
             updatedAt: serverTimestamp()
           });
-          console.log('✅ Booking status updated to null in Firebase');
+          console.log('✅ Booking status updated to completed in Firebase');
         } catch (bookingError) {
           console.error('❌ Error updating booking in Firebase:', bookingError);
           // Fallback to service function
-          await updateBookingStatusInFirestore(bookingId, null);
-          console.log('✅ Booking status updated to null using service fallback');
+          await updateBookingStatusInFirestore(bookingId, 'completed');
+          console.log('✅ Booking status updated using service fallback');
         }
       } else {
         console.warn('⚠️ No booking ID found in selectedReservation. Available fields:', Object.keys(selectedReservation));
@@ -134,36 +126,36 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           console.log('Found matching booking with fallback ID:', fallbackId);
           
           try {
-            // Direct Firebase update for fallback booking - set status to null
+            // Direct Firebase update for fallback booking
             const bookingRef = doc(db, 'bookings', fallbackId);
             await updateDoc(bookingRef, {
-              status: null,
+              status: 'completed',
               checkOutTime: new Date().toISOString(),
               paymentCompleted: true,
               paymentDate: serverTimestamp(),
               updatedAt: serverTimestamp()
             });
-            console.log('✅ Fallback booking status updated to null in Firebase');
+            console.log('✅ Fallback booking status updated to completed in Firebase');
           } catch (fallbackError) {
             console.error('❌ Error updating fallback booking:', fallbackError);
-            await updateBookingStatusInFirestore(fallbackId, null);
-            console.log('✅ Fallback booking status updated to null using service');
+            await updateBookingStatusInFirestore(fallbackId, 'completed');
+            console.log('✅ Fallback booking status updated using service');
           }
         } else {
           throw new Error('Could not find booking ID to update. Please try again.');
         }
       }
 
-      // Step 2: Update slot status to null in Firebase
+      // Step 2: Update slot status to available in Firebase
       const slotId = selectedReservation.slotId;
       if (slotId) {
-        console.log('🔄 Updating slot status to null for slot:', slotId);
+        console.log('🔄 Updating slot status to available for slot:', slotId);
         
         try {
-          // Direct Firebase update for slot - set status to null
+          // Direct Firebase update for slot
           const slotRef = doc(db, 'parkingSlots', slotId);
           await updateDoc(slotRef, {
-            status: null,
+            status: 'available',
             bookingId: null,
             customerName: null,
             vehicleNumber: null,
@@ -175,12 +167,12 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
             uniqueSlotId: null,
             updatedAt: serverTimestamp()
           });
-          console.log('✅ Slot status updated to null in Firebase');
+          console.log('✅ Slot status updated to available in Firebase');
           
           // Also try the service function as backup
           try {
-            await updateSlotStatus(slotId, null, null);
-            console.log('✅ Slot status also updated to null via service');
+            await updateSlotStatus(slotId, 'available', null);
+            console.log('✅ Slot status also updated via service');
           } catch (serviceError) {
             console.warn('⚠️ Service update failed, but Firebase update succeeded:', serviceError);
           }
@@ -189,8 +181,8 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           
           // Fallback to service function
           try {
-            await updateSlotStatus(slotId, null, null);
-            console.log('✅ Slot status updated to null using service fallback');
+            await updateSlotStatus(slotId, 'available', null);
+            console.log('✅ Slot status updated using service fallback');
           } catch (serviceError) {
             console.error('❌ Both Firebase and service updates failed:', serviceError);
             // Continue with the process even if slot update fails
@@ -200,32 +192,64 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         console.warn('⚠️ No slot ID found in selectedReservation');
       }
 
-      // Step 3: Create payment record in Firebase
+      // Step 3: Create payment record in paymentHistory collection
       try {
-        console.log('🔄 Creating payment record in Firebase...');
+        console.log('🔄 Creating payment record in paymentHistory collection...');
         
         const paymentData = {
-          bookingId: bookingId,
-          slotId: slotId,
-          customerName: selectedReservation.customerName,
-          vehicleNumber: selectedReservation.vehicleNumber,
-          vehicleType: selectedReservation.vehicleType,
-          phoneNumber: selectedReservation.phone,
-          checkInTime: selectedReservation.checkInTime,
+          // Booking Information
+          bookingId: bookingId || selectedReservation.id || selectedReservation.bookingId || selectedReservation._id,
+          
+          // Customer Information
+          customerName: selectedReservation.customerName || selectedReservation.name || 'N/A',
+          driverName: selectedReservation.customerName || selectedReservation.name || 'N/A', // For compatibility
+          phoneNumber: selectedReservation.phoneNumber || selectedReservation.phone || 'N/A',
+          
+          // Vehicle Information
+          vehicleNumber: selectedReservation.vehicleNumber || 'N/A',
+          vehicleType: selectedReservation.vehicleType || 'N/A',
+          
+          // Parking Information
+          slotId: slotId || selectedReservation.slotId || selectedReservation.slot || 'N/A',
+          
+          // Time Information
+          checkInTime: selectedReservation.checkInTime || selectedReservation.startTime || new Date().toISOString(),
           checkOutTime: new Date().toISOString(),
-          duration: selectedReservation.activeTimeHours,
+          duration: selectedReservation.activeTimeHours || selectedReservation.duration || 0,
+          
+          // Payment Information
           baseAmount: selectedReservation.amount || 0,
           overtimeAmount: selectedReservation.isOvertime ? (selectedReservation.overtimeHours * 300) : 0,
-          totalAmount: selectedReservation.calculatedAmount,
+          totalAmount: selectedReservation.calculatedAmount || 0,
+          amount: selectedReservation.calculatedAmount || 0, // For compatibility
           paymentMethod: 'Cash', // Default payment method
           paymentStatus: 'completed',
+          status: 'completed', // For compatibility
+          
+          // Overtime Information
+          isOvertime: selectedReservation.isOvertime || false,
+          overtimeHours: selectedReservation.overtimeHours || 0,
+          requestedDuration: selectedReservation.duration || 1,
+          
+          // System Information
           paymentDate: serverTimestamp(),
+          date: serverTimestamp(), // For compatibility
           parkId: JSON.parse(localStorage.getItem('authUser') || '{}').uid,
-          createdAt: serverTimestamp()
+          createdAt: serverTimestamp(),
+          updatedAt: serverTimestamp()
         };
         
-        const paymentRef = await addDoc(collection(db, 'payments'), paymentData);
-        console.log('✅ Payment record created with ID:', paymentRef.id);
+        const paymentRef = await addDoc(collection(db, 'paymentHistory'), paymentData);
+        console.log('✅ Payment record created in paymentHistory with ID:', paymentRef.id);
+        
+        // Also save to payments collection for backward compatibility
+        try {
+          await addDoc(collection(db, 'payments'), paymentData);
+          console.log('✅ Payment record also saved to payments collection');
+        } catch (backupError) {
+          console.warn('⚠️ Failed to save to payments collection:', backupError);
+        }
+        
       } catch (paymentError) {
         console.error('❌ Error creating payment record:', paymentError);
         // Continue with the process even if payment record creation fails
@@ -242,11 +266,8 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
 
       // Step 5: Show success message
       const displaySlotId = selectedReservation.slotId || 'Unknown';
-      const customerName = selectedReservation.customerName || 'Customer';
-      const amount = selectedReservation.calculatedAmount || 0;
-      
       console.log('🎉 Payment processing completed successfully!');
-      alert(`🎉 PAYMENT SUCCESS!\n\n✅ Customer: ${customerName}\n✅ Slot: ${displaySlotId}\n✅ Amount: Rs.${amount.toFixed(2)}\n✅ Status: Payment Completed\n✅ Slot Status: Updated to NULL\n✅ Booking Status: Updated to NULL\n\n🚗 Slot is now available for new bookings!\n\n📱 The page will refresh to show updated data.`);
+      alert(`✅ Payment processed successfully!\n\nSlot ${displaySlotId} is now available for new reservations.\n\nThe page will refresh to show updated data.`);
       
       // Step 6: Close modal
       setShowBillModal(false);
@@ -273,15 +294,25 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
 
   // Download functionality
   const downloadPaymentsData = () => {
-    const dataToExport = filteredPayments.map(payment => ({
+    const dataToExport = filteredCompletedPayments.map(payment => ({
+      'Payment ID': payment.id || 'N/A',
       'Driver Name': payment.driverName || payment.customerName || 'N/A',
+      'Phone Number': payment.phoneNumber || 'N/A',
       'Vehicle Type': payment.vehicleType || 'N/A',
       'Vehicle Number': payment.vehicleNumber || 'N/A',
       'Slot ID': payment.slotId || 'N/A',
+      'Requested Duration (Hours)': payment.requestedDuration || payment.duration || 'N/A',
+      'Overtime Hours': payment.overtimeHours || '0',
+      'Is Overtime': payment.isOvertime ? 'Yes' : 'No',
+      'Base Amount (Rs.)': payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00',
+      'Overtime Amount (Rs.)': payment.overtimeAmount ? payment.overtimeAmount.toFixed(2) : '0.00',
+      'Total Amount (Rs.)': payment.totalAmount ? payment.totalAmount.toFixed(2) : payment.amount ? payment.amount.toFixed(2) : '0.00',
       'Check-In Time': payment.checkInTime ? new Date(payment.checkInTime).toLocaleString() : 'N/A',
       'Check-Out Time': payment.checkOutTime ? new Date(payment.checkOutTime).toLocaleString() : 'N/A',
       'Payment Method': payment.paymentMethod || 'N/A',
-      'Amount (Rs.)': payment.amount ? payment.amount.toFixed(2) : '0.00',
+      'Payment Date': payment.paymentDate ? new Date(payment.paymentDate).toLocaleString() : payment.date ? new Date(payment.date).toLocaleString() : 'N/A',
+      'Booking ID': payment.bookingId || 'N/A',
+      'Park ID': payment.parkId || 'N/A',
       'Status': payment.status || 'N/A'
     }));
 
@@ -374,38 +405,56 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
       }
     });
 
-  // Filter and sort payments
-  const filteredPayments = payments
+  // Filter completed payments for "Payment Successful" tab - using ONLY paymentHistory collection data
+  const completedPayments = payments.filter(payment => {
+    // Only show payments that have the exact structure created in paymentHistory collection
+    // These records are created via handleProcessPayment function and have specific field combinations
+    return (
+      // Must have paymentHistory-specific fields
+      payment.paymentDate && 
+      payment.bookingId && 
+      payment.parkId &&
+      // Must have the amount breakdown structure from paymentHistory
+      (payment.baseAmount !== undefined || payment.totalAmount !== undefined) &&
+      // Must have the overtime structure from paymentHistory
+      (payment.isOvertime !== undefined && payment.overtimeHours !== undefined) &&
+      // Must have the duration structure from paymentHistory
+      payment.requestedDuration !== undefined &&
+      // Must have the customer info structure from paymentHistory
+      payment.driverName && payment.customerName && payment.phoneNumber &&
+      // Must have the system timestamps from paymentHistory
+      (payment.createdAt || payment.updatedAt)
+    );
+  });
+
+  // Filter and sort completed payments
+  const filteredCompletedPayments = completedPayments
     .filter(payment => {
       const matchesSearch = 
-        (payment.driverName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (payment.driverName || payment.customerName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
         (payment.vehicleNumber || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (payment.slotId || '').toLowerCase().includes(searchTerm.toLowerCase());
+        (payment.slotId || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (payment.id || '').toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesStatus = statusFilter === 'all' || payment.status === statusFilter;
       
-      // Filter by tab (pending vs completed)
-      const matchesTab = activeTab === 'pending' 
-        ? (payment.status === 'pending' || payment.status === 'failed' || !payment.status)
-        : (payment.status === 'completed' || payment.status === 'success');
-      
-      return matchesSearch && matchesStatus && matchesTab;
+      return matchesSearch && matchesStatus;
     })
     .sort((a, b) => {
       let aValue, bValue;
       
       switch (sortBy) {
         case 'amount':
-          aValue = a.amount || 0;
-          bValue = b.amount || 0;
+          aValue = a.amount || a.totalAmount || 0;
+          bValue = b.amount || b.totalAmount || 0;
           break;
         case 'date':
-          aValue = new Date(a.checkInTime || 0);
-          bValue = new Date(b.checkInTime || 0);
+          aValue = new Date(a.paymentDate || a.checkInTime || 0);
+          bValue = new Date(b.paymentDate || b.checkInTime || 0);
           break;
         case 'name':
-          aValue = (a.driverName || '').toLowerCase();
-          bValue = (b.driverName || '').toLowerCase();
+          aValue = (a.driverName || a.customerName || '').toLowerCase();
+          bValue = (b.driverName || b.customerName || '').toLowerCase();
           break;
         default:
           aValue = a[sortBy] || '';
@@ -419,132 +468,16 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
       }
     });
 
-  // Responsive styles
-  const containerStyle = {
-    margin: isMobile ? '20px 10px' : '50px 20px 20px 20px',
-    padding: isMobile ? 16 : 24,
-    maxWidth: '100%',
-    overflowX: 'hidden'
-  };
-
-  const headerStyle = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' : 'row',
-    justifyContent: 'space-between',
-    alignItems: isMobile ? 'flex-start' : 'center',
-    marginBottom: 24,
-    gap: isMobile ? 16 : 0
-  };
-
-  const titleStyle = {
-    fontSize: isMobile ? 20 : 24,
-    fontWeight: 700,
-    margin: 0,
-    color: '#111827'
-  };
-
-  const subtitleStyle = {
-    fontSize: isMobile ? 12 : 14,
-    color: '#6b7280',
-    margin: '4px 0 0 0'
-  };
-
-  const buttonContainerStyle = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' : 'row',
-    gap: isMobile ? 8 : 12,
-    width: isMobile ? '100%' : 'auto'
-  };
-
-  const buttonStyle = {
-    padding: isMobile ? '10px 16px' : '8px 16px',
-              backgroundColor: '#2563eb',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-    fontSize: isMobile ? 13 : 14,
-    fontWeight: '500',
-    transition: 'background-color 0.2s',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    justifyContent: 'center',
-    width: isMobile ? '100%' : 'auto',
-    minWidth: isMobile ? 'auto' : 120,
-    ':disabled': {
-      backgroundColor: '#9ca3af',
-      cursor: 'not-allowed',
-      opacity: 0.6
-    }
-  };
-
-  const searchContainerStyle = {
-    display: 'flex',
-    flexDirection: isMobile ? 'column' : 'row',
-    gap: isMobile ? 12 : 16,
-    marginBottom: 20,
-    alignItems: isMobile ? 'stretch' : 'center'
-  };
-
-  const searchInputStyle = {
-    flex: 1,
-    padding: '10px 12px',
-    border: '1px solid #d1d5db',
-    borderRadius: '6px',
-    fontSize: isMobile ? 14 : 14,
-    outline: 'none',
-    minWidth: isMobile ? 'auto' : 200
-  };
-
-  const selectStyle = {
-    padding: '10px 12px',
-    border: '1px solid #d1d5db',
-    borderRadius: '6px',
-    fontSize: isMobile ? 14 : 14,
-    backgroundColor: 'white',
-    outline: 'none',
-    minWidth: isMobile ? 'auto' : 120
-  };
-
-  const tableContainerStyle = {
-    background: '#fff',
-    borderRadius: 8,
-    boxShadow: '0 1px 3px 0 rgba(0,0,0,0.07)',
-    overflow: 'hidden'
-  };
-
-  const tableStyle = {
-    width: '100%',
-    borderCollapse: 'collapse',
-    minWidth: isMobile ? 600 : 'auto'
-  };
-
-  const thStyle = {
-    padding: isMobile ? '12px 8px' : '16px 12px',
-    textAlign: 'left',
-    fontWeight: 600,
-    fontSize: isMobile ? 12 : 14,
-    color: '#374151',
-    whiteSpace: 'nowrap'
-  };
-
-  const tdStyle = {
-    padding: isMobile ? '12px 8px' : '16px 12px',
-    fontSize: isMobile ? 12 : 14,
-    color: '#374151',
-    whiteSpace: 'nowrap'
-  };
-
+  // Status badge style function
   const statusBadgeStyle = (status) => ({
     padding: '4px 8px',
     borderRadius: '12px',
-    fontSize: isMobile ? 10 : 12,
-              fontWeight: '500',
+    fontSize: responsiveStyles.th.fontSize,
+    fontWeight: '500',
     backgroundColor: status === 'completed' ? '#dcfce7' : status === 'pending' ? '#fef3c7' : '#fee2e2',
     color: status === 'completed' ? '#166534' : status === 'pending' ? '#92400e' : '#dc2626',
     display: 'inline-block',
-    minWidth: isMobile ? 60 : 70,
+    minWidth: screenSize.isMobile ? 60 : 70,
     textAlign: 'center'
   });
 
@@ -561,8 +494,8 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
     }}>
       {/* Header Section */}
       <div style={{ 
-        display: 'flex', 
-        justifyContent: 'space-between', 
+    display: 'flex',
+    justifyContent: 'space-between',
         alignItems: 'flex-start', 
         marginBottom: 16,
         paddingBottom: 12,
@@ -579,7 +512,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         <div style={{ textAlign: 'right' }}>
           <div style={{ 
             fontSize: 20, 
-            fontWeight: 700, 
+    fontWeight: 700,
             color: booking.isOvertime ? '#dc2626' : '#059669',
             marginBottom: 4
           }}>
@@ -641,7 +574,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
             fontSize: 13,
             fontWeight: '600',
             cursor: 'pointer',
-            display: 'flex',
+    display: 'flex',
             alignItems: 'center',
             gap: '6px',
             transition: 'background-color 0.2s ease',
@@ -658,14 +591,14 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           style={{
             padding: '8px 16px',
             backgroundColor: '#059669',
-            color: 'white',
-            border: 'none',
+              color: 'white',
+              border: 'none',
             borderRadius: '8px',
             fontSize: 13,
             fontWeight: '600',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
+              cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
             gap: '6px',
             transition: 'background-color 0.2s ease',
             flex: 1
@@ -711,11 +644,23 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           <div style={{ 
             fontSize: 20, 
             fontWeight: 700, 
-            color: '#059669',
+            color: payment.isOvertime ? '#dc2626' : '#059669',
             marginBottom: 4
           }}>
-            Rs.{payment.amount ? payment.amount.toFixed(2) : '0.00'}
+            Rs.{payment.totalAmount ? payment.totalAmount.toFixed(2) : payment.amount ? payment.amount.toFixed(2) : '0.00'}
           </div>
+          {payment.isOvertime && (
+            <div style={{
+              padding: '4px 8px',
+              borderRadius: '6px',
+              fontSize: 11,
+              fontWeight: '600',
+              backgroundColor: '#fef2f2',
+              color: '#dc2626'
+            }}>
+              Overtime
+            </div>
+          )}
           <div style={{
             padding: '4px 8px',
             borderRadius: '6px',
@@ -750,7 +695,18 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         <div>
           <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 4px 0', fontWeight: '500' }}>Duration</p>
           <p style={{ fontSize: 13, fontWeight: 500, margin: 0, color: '#1e293b' }}>
-            {payment.duration ? `${payment.duration} hour${payment.duration > 1 ? 's' : ''}` : 'N/A'}
+            {payment.requestedDuration ? `${payment.requestedDuration} hour${payment.requestedDuration > 1 ? 's' : ''}` : payment.duration ? `${payment.duration} hour${payment.duration > 1 ? 's' : ''}` : 'N/A'}
+          </p>
+          {payment.isOvertime && (
+            <p style={{ fontSize: 11, color: '#dc2626', margin: '2px 0 0 0', fontWeight: '500' }}>
+              +{payment.overtimeHours}h overtime
+            </p>
+          )}
+        </div>
+        <div>
+          <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 4px 0', fontWeight: '500' }}>Base Amount</p>
+          <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#059669' }}>
+            Rs.{payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00'}
           </p>
         </div>
         <div>
@@ -791,72 +747,45 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
   );
 
   return (
-    <div style={containerStyle}>
+    <div style={responsiveStyles.container}>
       {/* Header */}
-      <div style={headerStyle}>
+      <div style={responsiveStyles.header}>
         <div>
-          <h2 style={titleStyle}>Payment Records</h2>
-          <p style={subtitleStyle}>
+          <h2 style={responsiveStyles.title}>Payment Records</h2>
+          <p style={responsiveStyles.subtitle}>
             {activeTab === 'pending' 
               ? `${filteredApprovedBookings.length} of ${approvedBookings.length} approved reservation(s)`
-              : `${filteredPayments.length} of ${payments.filter(p => p.status === 'completed' || p.status === 'success').length} completed payment(s)`
+              : `${filteredCompletedPayments.length} of ${completedPayments.length} completed payment(s)`
             }
           </p>
         </div>
         
         {/* Download Button */}
-        <div style={buttonContainerStyle}>
+        <div style={responsiveStyles.buttonContainer}>
           <button
             onClick={downloadPaymentsData}
-            style={{ ...buttonStyle, backgroundColor: '#059669' }}
+            style={{ ...responsiveStyles.button, backgroundColor: '#059669' }}
             onMouseOver={(e) => e.target.style.backgroundColor = '#047857'}
             onMouseOut={(e) => e.target.style.backgroundColor = '#059669'}
-            disabled={filteredPayments.length === 0}
+            disabled={filteredCompletedPayments.length === 0}
           >
-            <FileText size={isMobile ? 14 : 16} />
-            {isMobile ? 'Download' : 'Download Report'}
+            <FileText size={screenSize.isMobile ? 14 : 16} />
+            {screenSize.isMobile ? 'Download' : 'Download Report'}
           </button>
         </div>
       </div>
 
       {/* Tab Navigation */}
-      <div style={{
-        display: 'flex',
-        gap: isMobile ? 4 : 8,
-        marginBottom: isMobile ? 16 : 24,
-        borderBottom: '1px solid #e5e7eb',
-        overflowX: 'auto'
-      }}>
+      <div style={tabStyles.tabContainer}>
         <button
           onClick={() => setActiveTab('pending')}
           style={{
-            padding: isMobile ? '10px 16px' : '14px 24px',
-            border: 'none',
-            background: 'none',
-            cursor: 'pointer',
-            fontSize: isMobile ? 13 : 16,
-            fontWeight: activeTab === 'pending' ? 600 : 500,
-            color: activeTab === 'pending' ? '#2563eb' : '#6b7280',
-            borderBottom: activeTab === 'pending' ? '2px solid #2563eb' : '2px solid transparent',
-            whiteSpace: 'nowrap',
-            display: 'flex',
-            alignItems: 'center',
-            gap: isMobile ? 6 : 12,
-            transition: 'all 0.2s',
-            minWidth: 'fit-content'
+            ...tabStyles.tab,
+            ...(activeTab === 'pending' ? tabStyles.activeTab : {})
           }}
         >
           <span>Need to Payment</span>
-          <span style={{
-            backgroundColor: '#f3f4f6',
-            color: '#374151',
-            padding: isMobile ? '2px 6px' : '4px 10px',
-            borderRadius: '12px',
-            fontSize: isMobile ? 10 : 12,
-            fontWeight: 600,
-            minWidth: isMobile ? 20 : 28,
-            textAlign: 'center'
-          }}>
+          <span style={tabStyles.tabBadge}>
             {approvedBookings.length}
           </span>
         </button>
@@ -864,40 +793,19 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         <button
           onClick={() => setActiveTab('completed')}
           style={{
-            padding: isMobile ? '10px 16px' : '14px 24px',
-            border: 'none',
-            background: 'none',
-            cursor: 'pointer',
-            fontSize: isMobile ? 13 : 16,
-            fontWeight: activeTab === 'completed' ? 600 : 500,
-            color: activeTab === 'completed' ? '#2563eb' : '#6b7280',
-            borderBottom: activeTab === 'completed' ? '2px solid #2563eb' : '2px solid transparent',
-            whiteSpace: 'nowrap',
-            display: 'flex',
-            alignItems: 'center',
-            gap: isMobile ? 6 : 12,
-            transition: 'all 0.2s',
-            minWidth: 'fit-content'
+            ...tabStyles.tab,
+            ...(activeTab === 'completed' ? tabStyles.activeTab : {})
           }}
         >
           <span>Payment Successful</span>
-          <span style={{
-            backgroundColor: '#f3f4f6',
-            color: '#374151',
-            padding: isMobile ? '2px 6px' : '4px 10px',
-            borderRadius: '12px',
-            fontSize: isMobile ? 10 : 12,
-            fontWeight: 600,
-            minWidth: isMobile ? 20 : 28,
-            textAlign: 'center'
-          }}>
-            {payments.filter(p => p.status === 'completed' || p.status === 'success').length}
+          <span style={tabStyles.tabBadge}>
+            {completedPayments.length}
           </span>
         </button>
       </div>
 
       {/* Search and Filter */}
-      <div style={searchContainerStyle}>
+      <div style={responsiveStyles.searchContainer}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Search 
             size={16} 
@@ -911,17 +819,17 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           />
           <input
             type="text"
-            placeholder="Search by name, vehicle, or slot..."
+            placeholder={activeTab === 'pending' ? "Search by name, vehicle, or slot..." : "Search by name, vehicle, slot, or payment ID..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ ...searchInputStyle, paddingLeft: 40 }}
+            style={{ ...responsiveStyles.input, paddingLeft: 40 }}
           />
         </div>
         
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          style={selectStyle}
+          style={responsiveStyles.select}
         >
           <option value="all">All Status</option>
           <option value="completed">Completed</option>
@@ -932,7 +840,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          style={selectStyle}
+          style={responsiveStyles.select}
         >
           <option value="date">Sort by Date</option>
           <option value="amount">Sort by Amount</option>
@@ -961,30 +869,30 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           <div style={{ 
             color: '#6b7280', 
             textAlign: 'center', 
-            padding: isMobile ? 40 : 60,
-            fontSize: isMobile ? 14 : 16
+            padding: screenSize.isMobile ? 40 : 60,
+            fontSize: screenSize.isMobile ? 14 : 16
           }}>
             {approvedBookings.length === 0 ? 'No approved reservations found.' : 'No approved reservations match your search criteria.'}
           </div>
         ) : (
-          <div style={tableContainerStyle}>
-            {isMobile ? (
+          <div style={responsiveStyles.tableContainer}>
+            {screenSize.isMobile ? (
               // Mobile card view for reservations
-              <div style={{ padding: isMobile ? 16 : 24 }}>
+              <div style={{ padding: screenSize.isMobile ? 16 : 24 }}>
                 {filteredApprovedBookings.map((booking, index) => renderReservationMobileCard(booking, index))}
               </div>
             ) : (
               // Desktop table view for reservations
               <div style={{ overflowX: 'auto' }}>
-                <table style={tableStyle}>
+                <table style={responsiveStyles.table}>
                   <thead>
                     <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                      <th style={thStyle}>Customer</th>
-                      <th style={thStyle}>Vehicle</th>
-                      <th style={thStyle}>Slot</th>
-                      <th style={thStyle}>Active Time</th>
-                      <th style={thStyle}>Amount</th>
-                      <th style={thStyle}>Action</th>
+                      <th style={responsiveStyles.th}>Customer</th>
+                      <th style={responsiveStyles.th}>Vehicle</th>
+                      <th style={responsiveStyles.th}>Slot</th>
+                      <th style={responsiveStyles.th}>Active Time</th>
+                      <th style={responsiveStyles.th}>Amount</th>
+                      <th style={responsiveStyles.th}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -993,7 +901,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                         borderBottom: '1px solid #f3f4f6', 
                         backgroundColor: idx % 2 === 0 ? '#fff' : '#fafafa'
                       }}>
-                        <td style={{ ...tdStyle, fontWeight: '500' }}>
+                        <td style={{ ...responsiveStyles.td, fontWeight: '500' }}>
                           <div>
                             <div style={{ fontWeight: '600', color: '#1e293b' }}>
                               {booking.customerName || booking.name || 'N/A'}
@@ -1003,7 +911,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                             </div>
                           </div>
                         </td>
-                        <td style={tdStyle}>
+                        <td style={responsiveStyles.td}>
                           <div>
                             <div style={{ fontWeight: '500', color: '#1e293b' }}>
                               {booking.vehicleNumber || 'N/A'}
@@ -1013,10 +921,10 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                             </div>
                           </div>
                         </td>
-                        <td style={{ ...tdStyle, fontWeight: '600', color: '#059669' }}>
+                        <td style={{ ...responsiveStyles.td, fontWeight: '600', color: '#059669' }}>
                           {booking.slotId || booking.slot || 'N/A'}
                         </td>
-                        <td style={{ ...tdStyle, fontWeight: '600', color: booking.isOvertime ? '#dc2626' : '#059669' }}>
+                        <td style={{ ...responsiveStyles.td, fontWeight: '600', color: booking.isOvertime ? '#dc2626' : '#059669' }}>
                           <div>
                             <div style={{ fontSize: '14px', fontWeight: '600' }}>
                               {booking.activeTimeHours} hours
@@ -1028,10 +936,10 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                             )}
                           </div>
                         </td>
-                        <td style={{ ...tdStyle, fontWeight: '700', color: booking.isOvertime ? '#dc2626' : '#059669', fontSize: '16px' }}>
+                        <td style={{ ...responsiveStyles.td, fontWeight: '700', color: booking.isOvertime ? '#dc2626' : '#059669', fontSize: '16px' }}>
                           Rs.{booking.calculatedAmount ? booking.calculatedAmount.toFixed(2) : '0.00'}
                         </td>
-                        <td style={tdStyle}>
+                        <td style={responsiveStyles.td}>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <button
                               onClick={() => handleViewFullRecord(booking)}
@@ -1088,55 +996,58 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         )
       ) : (
         // Show completed payments in "Payment Successful" tab
-        filteredPayments.length === 0 ? (
+        filteredCompletedPayments.length === 0 ? (
         <div style={{ 
           color: '#6b7280', 
           textAlign: 'center', 
-          padding: isMobile ? 40 : 60,
-          fontSize: isMobile ? 14 : 16
+          padding: screenSize.isMobile ? 40 : 60,
+          fontSize: screenSize.isMobile ? 14 : 16
         }}>
-          {payments.length === 0 ? 'No payment records found.' : 'No payments match your search criteria.'}
+          {completedPayments.length === 0 ? 'No completed payment records found.' : 'No completed payments match your search criteria.'}
         </div>
       ) : (
-        <div style={tableContainerStyle}>
-          {isMobile ? (
+        <div style={responsiveStyles.tableContainer}>
+          {screenSize.isMobile ? (
               // Mobile card view for payments
-            <div style={{ padding: isMobile ? 16 : 24 }}>
-              {filteredPayments.map((payment, index) => renderMobileCard(payment, index))}
+            <div style={{ padding: screenSize.isMobile ? 16 : 24 }}>
+              {filteredCompletedPayments.map((payment, index) => renderMobileCard(payment, index))}
     </div>
     ) : (
               // Desktop table view for payments
         <div style={{ overflowX: 'auto' }}>
-              <table style={tableStyle}>
+              <table style={responsiveStyles.table}>
             <thead>
               <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                       <th style={thStyle}>Payment ID</th>
-                       <th style={thStyle}>Customer</th>
-                       <th style={thStyle}>Vehicle</th>
-                       <th style={thStyle}>Slot</th>
-                    <th style={thStyle}>Amount</th>
-                    <th style={thStyle}>Payment Method</th>
-                       <th style={thStyle}>Payment Date</th>
-                       <th style={thStyle}>Action</th>
+                       <th style={responsiveStyles.th}>Payment ID</th>
+                       <th style={responsiveStyles.th}>Customer</th>
+                       <th style={responsiveStyles.th}>Vehicle</th>
+                       <th style={responsiveStyles.th}>Slot</th>
+                       <th style={responsiveStyles.th}>Duration</th>
+                       <th style={responsiveStyles.th}>Base Amount</th>
+                       <th style={responsiveStyles.th}>Overtime</th>
+                    <th style={responsiveStyles.th}>Total Amount</th>
+                    <th style={responsiveStyles.th}>Payment Method</th>
+                       <th style={responsiveStyles.th}>Payment Date</th>
+                       <th style={responsiveStyles.th}>Action</th>
               </tr>
             </thead>
             <tbody>
-                  {filteredPayments.map((payment, idx) => (
+                  {filteredCompletedPayments.map((payment, idx) => (
                     <tr key={idx} style={{ 
                       borderBottom: '1px solid #f3f4f6', 
                         backgroundColor: idx % 2 === 0 ? '#fff' : '#fafafa'
                       }}>
-                        <td style={{ ...tdStyle, fontWeight: '600', color: '#3b82f6', fontFamily: 'monospace' }}>
+                        <td style={{ ...responsiveStyles.td, fontWeight: '600', color: '#3b82f6', fontFamily: 'monospace' }}>
                           {payment.id ? `#${payment.id.slice(-6)}` : 'N/A'}
                         </td>
-                        <td style={{ ...tdStyle, fontWeight: '500' }}>
+                        <td style={{ ...responsiveStyles.td, fontWeight: '500' }}>
                           <div>
                             <div style={{ fontWeight: '600', color: '#1e293b' }}>
                     {payment.driverName || payment.customerName || 'N/A'}
                             </div>
                           </div>
                   </td>
-                      <td style={tdStyle}>
+                      <td style={responsiveStyles.td}>
                           <div>
                             <div style={{ fontWeight: '500', color: '#1e293b' }}>
                               {payment.vehicleNumber || 'N/A'}
@@ -1146,13 +1057,42 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                             </div>
                           </div>
                   </td>
-                                                 <td style={{ ...tdStyle, fontWeight: '600', color: '#059669' }}>
+                                                 <td style={{ ...responsiveStyles.td, fontWeight: '600', color: '#059669' }}>
                     {payment.slotId || 'N/A'}
                   </td>
-                         <td style={{ ...tdStyle, fontWeight: '700', color: '#059669', fontSize: '16px' }}>
-                           Rs.{payment.amount ? payment.amount.toFixed(2) : '0.00'}
+                  <td style={responsiveStyles.td}>
+                    <div>
+                      <div style={{ fontWeight: '500', color: '#1e293b' }}>
+                        {payment.requestedDuration ? `${payment.requestedDuration} hour${payment.requestedDuration > 1 ? 's' : ''}` : payment.duration ? `${payment.duration} hour${payment.duration > 1 ? 's' : ''}` : 'N/A'}
+                      </div>
+                      {payment.isOvertime && (
+                        <div style={{ fontSize: '11px', color: '#dc2626', fontWeight: '500' }}>
+                          +{payment.overtimeHours}h overtime
+                        </div>
+                      )}
+                    </div>
                   </td>
-                      <td style={tdStyle}>
+                  <td style={{ ...responsiveStyles.td, fontWeight: '600', color: '#059669', fontSize: '14px' }}>
+                    Rs.{payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00'}
+                  </td>
+                  <td style={responsiveStyles.td}>
+                    {payment.isOvertime ? (
+                      <div>
+                        <div style={{ fontSize: '12px', fontWeight: '600', color: '#dc2626' }}>
+                          Rs.{payment.overtimeAmount ? payment.overtimeAmount.toFixed(2) : '0.00'}
+                        </div>
+                        <div style={{ fontSize: '10px', color: '#dc2626' }}>
+                          {payment.overtimeHours}h
+                        </div>
+                      </div>
+                    ) : (
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>No overtime</div>
+                    )}
+                  </td>
+                         <td style={{ ...responsiveStyles.td, fontWeight: '700', color: payment.isOvertime ? '#dc2626' : '#059669', fontSize: '16px' }}>
+                           Rs.{payment.totalAmount ? payment.totalAmount.toFixed(2) : payment.amount ? payment.amount.toFixed(2) : '0.00'}
+                  </td>
+                      <td style={responsiveStyles.td}>
                            <span style={{
                              padding: '4px 8px',
                              borderRadius: '6px',
@@ -1168,12 +1108,12 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                              {payment.paymentMethod || 'N/A'}
                            </span>
                   </td>
-                      <td style={tdStyle}>
+                      <td style={responsiveStyles.td}>
                            <div style={{ fontSize: '13px', fontWeight: '500' }}>
                              {payment.date ? new Date(payment.date).toLocaleDateString() : 'N/A'}
                            </div>
                   </td>
-                      <td style={tdStyle}>
+                      <td style={responsiveStyles.td}>
                            <button
                              onClick={() => handleViewFullRecord(payment)}
                              style={{
@@ -1210,36 +1150,14 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
        {/* Payment Details Modal */}
        {console.log('Modal state:', { showPaymentModal, selectedPayment })}
        {showPaymentModal && selectedPayment && (
-                    <div style={{
-             position: 'fixed',
-             top: 0,
-             left: 0,
-             right: 0,
-             bottom: 0,
-             backgroundColor: 'rgba(0, 0, 0, 0.5)',
-             display: 'flex',
-             alignItems: 'center',
-             justifyContent: 'center',
-             zIndex: 1000,
-             padding: '20px'
-           }}
+                    <div style={responsiveStyles.modal}
            onClick={() => {
              console.log('X button clicked');
              setShowPaymentModal(false);
              setSelectedPayment(null);
            }}
            >
-           <div style={{
-             backgroundColor: 'white',
-             borderRadius: '12px',
-             padding: '20px',
-             maxWidth: '800px',
-             width: '100%',
-             maxHeight: '80vh',
-             boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-             display: 'flex',
-             flexDirection: 'column'
-           }}
+           <div style={responsiveStyles.modalContent}
            onClick={(e) => e.stopPropagation()}
            >
              {/* Modal Header */}
@@ -1389,12 +1307,12 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                          }
                        </span>
                      </div>
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Duration: </span>
-                       <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
-                         {selectedPayment.duration ? `${selectedPayment.duration} hour${selectedPayment.duration > 1 ? 's' : ''}` : 'N/A'}
-                       </span>
-                     </div>
+                                            <div>
+                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Requested Duration: </span>
+                        <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
+                          {selectedPayment.requestedDuration ? `${selectedPayment.requestedDuration} hour${selectedPayment.requestedDuration > 1 ? 's' : ''}` : selectedPayment.duration ? `${selectedPayment.duration} hour${selectedPayment.duration > 1 ? 's' : ''}` : 'N/A'}
+                        </span>
+                      </div>
                    </div>
                  </div>
                </div>
@@ -1420,12 +1338,26 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                          </span>
                        </div>
                      )}
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Amount: </span>
-                       <span style={{ fontSize: '16px', fontWeight: '700', color: selectedPayment.isOvertime ? '#dc2626' : '#059669' }}>
-                         Rs.{selectedPayment.amount ? selectedPayment.amount.toFixed(2) : selectedPayment.calculatedAmount ? selectedPayment.calculatedAmount.toFixed(2) : '0.00'}
-                       </span>
-                     </div>
+                                           <div>
+                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Base Amount: </span>
+                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#059669' }}>
+                          Rs.{selectedPayment.baseAmount ? selectedPayment.baseAmount.toFixed(2) : '0.00'}
+                        </span>
+                      </div>
+                      {selectedPayment.isOvertime && (
+                        <div>
+                          <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Overtime Amount: </span>
+                          <span style={{ fontSize: '14px', fontWeight: '600', color: '#dc2626' }}>
+                            Rs.{selectedPayment.overtimeAmount ? selectedPayment.overtimeAmount.toFixed(2) : '0.00'}
+                          </span>
+                        </div>
+                      )}
+                      <div>
+                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Total Amount: </span>
+                        <span style={{ fontSize: '16px', fontWeight: '700', color: selectedPayment.isOvertime ? '#dc2626' : '#059669' }}>
+                          Rs.{selectedPayment.totalAmount ? selectedPayment.totalAmount.toFixed(2) : selectedPayment.amount ? selectedPayment.amount.toFixed(2) : selectedPayment.calculatedAmount ? selectedPayment.calculatedAmount.toFixed(2) : '0.00'}
+                        </span>
+                      </div>
                      {selectedPayment.id && (
                        <div>
                          <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Method: </span>
@@ -1464,14 +1396,22 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                          }
                        </span>
                      </div>
-                     {selectedPayment.id && selectedPayment.bookingId && (
-                       <div>
-                         <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Booking ID: </span>
-                         <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
-                           {selectedPayment.bookingId}
-                         </span>
-                       </div>
-                     )}
+                                           {selectedPayment.bookingId && (
+                        <div>
+                          <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Booking ID: </span>
+                          <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
+                            {selectedPayment.bookingId}
+                          </span>
+                        </div>
+                      )}
+                      {selectedPayment.parkId && (
+                        <div>
+                          <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Park ID: </span>
+                          <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
+                            {selectedPayment.parkId}
+                          </span>
+                        </div>
+                      )}
                    </div>
                  </div>
 
@@ -1531,21 +1471,8 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
     )}
 
     {/* Bill Modal for Payment */}
-    {console.log('Modal render check:', { showBillModal, selectedReservation })}
     {showBillModal && selectedReservation && (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000,
-        padding: '20px'
-      }}
+      <div style={responsiveStyles.modal}
       onClick={() => {
         console.log('X button clicked');
         setShowBillModal(false);
@@ -1553,19 +1480,9 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
       }}
       >
         <div style={{
-          backgroundColor: 'white',
-          borderRadius: '12px',
-          padding: '24px',
-          maxWidth: '600px',
-          width: '100%',
-          maxHeight: '80vh',
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-          position: 'relative',
-          zIndex: 1001,
-          pointerEvents: 'auto'
+          ...responsiveStyles.modalContent,
+          maxWidth: screenSize.isMobile ? '95vw' : '600px',
+          maxHeight: screenSize.isMobile ? '90vh' : '80vh'
         }}
         onClick={(e) => e.stopPropagation()}
         >
@@ -1726,9 +1643,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
             justifyContent: 'space-between',
             alignItems: 'center',
             paddingTop: '16px',
-            borderTop: '1px solid #e5e7eb',
-            position: 'relative',
-            zIndex: 1002
+            borderTop: '1px solid #e5e7eb'
           }}>
             <button
               onClick={() => {
@@ -1752,31 +1667,28 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
             >
               Cancel
             </button>
-
-
-            
             <button
-  onClick={handleProcessPayment}
-  data-process-payment="true"
-  style={{
-    padding: '10px 20px',
-    backgroundColor: '#3b82f6',
-    color: 'white',
-    border: 'none',
-    borderRadius: '6px',
-    fontSize: '14px',
-    fontWeight: '600',
-    cursor: 'pointer',
-    transition: 'background-color 0.2s ease',
-    minWidth: '120px',
-    pointerEvents: 'auto',
-    outline: 'none'
-  }}
-  onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-  onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
->
-  💳 Process Payment
-</button>
+              onClick={handleProcessPayment}
+              data-process-payment
+              style={{
+                padding: '12px 24px',
+                backgroundColor: '#059669',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '16px',
+                fontWeight: '700',
+                cursor: 'pointer',
+                transition: 'background-color 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}
+              onMouseEnter={(e) => e.target.style.backgroundColor = '#047857'}
+              onMouseLeave={(e) => e.target.style.backgroundColor = '#059669'}
+            >
+              💳 Process Payment
+            </button>
           </div>
         </div>
       </div>

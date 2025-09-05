@@ -17,9 +17,9 @@ import SettingsPage from './SettingsPage';
 import EditBookingModal from './EditBookingModal';
 import AddCustomerPage from './AddCustomerPage';
 
-
 import { updateBookingStatusInFirestore, deleteBookingFromFirestore } from '../services/bookingService';
 import styles from '../styles/styles';
+import { useResponsive, getResponsiveStyles } from '../utils/responsive';
 
 const AdminDashboard = ({ 
   slots, 
@@ -51,32 +51,9 @@ const AdminDashboard = ({
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [editingBooking, setEditingBooking] = useState(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth <= 480);
-  const [isSmallTablet, setIsSmallTablet] = useState(window.innerWidth <= 768);
-  const [isTablet, setIsTablet] = useState(window.innerWidth <= 1024);
-  const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth <= 1440);
+  const screenSize = useResponsive();
+  const responsiveStyles = getResponsiveStyles(screenSize);
   const navigate = useNavigate();
-
-  // Enhanced responsive breakpoint handling
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(window.innerWidth <= 480);
-      setIsSmallTablet(window.innerWidth <= 768);
-      setIsTablet(window.innerWidth <= 1024);
-      setIsLargeScreen(window.innerWidth <= 1440);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Responsive helper function
-  const getResponsiveValue = (mobile, smallTablet, tablet, large, desktop) => {
-    if (isMobile) return mobile;
-    if (isSmallTablet) return smallTablet;
-    if (isTablet) return tablet;
-    if (isLargeScreen) return large;
-    return desktop;
-  };
 
   const pageNames = {
     dashboard: 'Dashboard',
@@ -181,49 +158,25 @@ const AdminDashboard = ({
 
   // Responsive styles
   const containerStyle = {
-    margin: getResponsiveValue('0', '10px', '15px 12px', '20px 0 40px 10px', '20px 0 40px 10px'),
-    padding: getResponsiveValue(8, 12, 16, 24, 24),
-    maxWidth: '100%',
-    overflowX: 'hidden',
-    minHeight: getResponsiveValue('calc(100vh - 60px)', 'auto', 'auto', 'auto', 'auto'), // Account for mobile top bar
+    ...responsiveStyles.container,
+    minHeight: screenSize.isMobile ? 'calc(100vh - 60px)' : 'auto', // Account for mobile top bar
     boxSizing: 'border-box'
   };
 
   const titleStyle = {
-    fontSize: getResponsiveValue(16, 18, 20, 24, 24),
-    fontWeight: 700,
-    marginBottom: getResponsiveValue(12, 16, 20, 24, 24),
-    color: '#111827',
-    textAlign: getResponsiveValue('center', 'left', 'left', 'left', 'left'),
-    padding: getResponsiveValue('0 8px', '0', '0', '0', '0')
+    ...responsiveStyles.title,
+    textAlign: screenSize.isMobile ? 'center' : 'left',
+    padding: screenSize.isMobile ? '0 8px' : '0'
   };
 
-  const analyticsGridStyle = {
-    display: 'grid',
-    gridTemplateColumns: getResponsiveValue(
-      '1fr', // Mobile: single column
-      '1fr', // Small tablet: single column for better readability
-      'repeat(2, 1fr)', // Tablet: 2 columns
-      'repeat(3, 1fr)', // Large screen: 3 columns (better for 5 cards)
-      'repeat(5, 1fr)' // Desktop: 5 columns
-    ),
-    gap: getResponsiveValue(8, 12, 16, 24, 24),
-    marginBottom: getResponsiveValue(16, 20, 24, 32, 32),
-    padding: getResponsiveValue('0 8px', '0', '0', '0', '0'),
-    width: '100%',
-    boxSizing: 'border-box'
-  };
+  const analyticsGridStyle = responsiveStyles.analyticsGrid;
 
   const analyticsCardStyle = {
-    background: '#fff',
-    borderRadius: getResponsiveValue(6, 8, 10, 12, 12),
-    padding: getResponsiveValue(12, 16, 20, 24, 24),
-    boxShadow: '0 1px 3px 0 rgba(0,0,0,0.07)',
-    border: '1px solid #e5e7eb',
+    ...responsiveStyles.analyticsCard,
     transition: 'transform 0.2s, box-shadow 0.2s',
     cursor: 'pointer',
     width: '100%',
-    minHeight: getResponsiveValue(80, 90, 100, 'auto', 'auto'),
+    minHeight: screenSize.isMobile ? 80 : screenSize.isSmallTablet ? 90 : screenSize.isTablet ? 100 : 'auto',
     display: 'flex',
     alignItems: 'center',
     boxSizing: 'border-box',
@@ -240,25 +193,19 @@ const AdminDashboard = ({
   };
 
   const analyticsCardTextStyle = {
-    fontSize: getResponsiveValue(11, 12, 13, 14, 14),
-    color: '#6b7280',
-    margin: '0 0 4px 0',
-    fontWeight: '500',
+    ...responsiveStyles.analyticsCardTitle,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    maxWidth: getResponsiveValue('60px', '80px', '100px', '120px', '120px')
+    maxWidth: screenSize.isMobile ? '60px' : screenSize.isSmallTablet ? '80px' : screenSize.isTablet ? '100px' : '120px'
   };
 
   const analyticsCardNumberStyle = {
-    fontSize: getResponsiveValue(18, 20, 24, 32, 32),
-    fontWeight: '700',
-    margin: 0,
-    color: '#111827',
+    ...responsiveStyles.analyticsCardNumber,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    maxWidth: getResponsiveValue('60px', '80px', '100px', '120px', '120px')
+    maxWidth: screenSize.isMobile ? '60px' : screenSize.isSmallTablet ? '80px' : screenSize.isTablet ? '100px' : '120px'
   };
 
   const mainContainerStyle = {
@@ -271,10 +218,10 @@ const AdminDashboard = ({
 
   const contentAreaStyle = {
     flex: 1,
-    marginLeft: getResponsiveValue(0, 0, 240, 240, 240),
+    marginLeft: screenSize.isMobile || screenSize.isSmallTablet ? 0 : 240,
     transition: 'margin-left 0.2s',
-    width: getResponsiveValue('100%', '100%', 'calc(100% - 240px)', 'calc(100% - 240px)', 'calc(100% - 240px)'),
-    paddingTop: getResponsiveValue(60, 0, 0, 0, 0), // Add top padding for mobile to account for fixed sidebar
+    width: screenSize.isMobile || screenSize.isSmallTablet ? '100%' : 'calc(100% - 240px)',
+    paddingTop: screenSize.isMobile ? 60 : 0, // Add top padding for mobile to account for fixed sidebar
     minWidth: 0, // Prevent flex item from overflowing
     overflowX: 'hidden'
   };
@@ -293,7 +240,7 @@ const AdminDashboard = ({
                 {designElements?.filter(element => element.type === 'slot').length || 0}
               </p>
             </div>
-            <MapPin size={getResponsiveValue(20, 24, 28, 32, 32)} color="#3b82f6" style={{ flexShrink: 0 }} />
+            <MapPin size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#3b82f6" style={{ flexShrink: 0 }} />
           </div>
         </div>
         
@@ -310,7 +257,7 @@ const AdminDashboard = ({
                 })()}
               </p>
             </div>
-            <MapPin size={getResponsiveValue(20, 24, 28, 32, 32)} color="#10b981" style={{ flexShrink: 0 }} />
+            <MapPin size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#10b981" style={{ flexShrink: 0 }} />
           </div>
         </div>
         
@@ -322,7 +269,7 @@ const AdminDashboard = ({
                 {slots?.filter(slot => slot.status === 'occupied').length || 0}
               </p>
             </div>
-            <Car size={getResponsiveValue(20, 24, 28, 32, 32)} color="#ef4444" style={{ flexShrink: 0 }} />
+            <Car size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#ef4444" style={{ flexShrink: 0 }} />
           </div>
         </div>
         
@@ -334,7 +281,7 @@ const AdminDashboard = ({
                 {slots?.filter(slot => slot.status === 'reserved').length || 0}
               </p>
             </div>
-            <Clock size={getResponsiveValue(20, 24, 28, 32, 32)} color="#f59e0b" style={{ flexShrink: 0 }} />
+            <Clock size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#f59e0b" style={{ flexShrink: 0 }} />
           </div>
         </div>
         
@@ -352,7 +299,7 @@ const AdminDashboard = ({
                 })()}%
               </p>
             </div>
-            <BarChart3 size={getResponsiveValue(20, 24, 28, 32, 32)} color="#3b82f6" style={{ flexShrink: 0 }} />
+            <BarChart3 size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#3b82f6" style={{ flexShrink: 0 }} />
           </div>
         </div>
       </div>
@@ -424,7 +371,7 @@ const AdminDashboard = ({
       />
       
       <div style={contentAreaStyle}>
-        <TopBar pageName={pageNames[activeTab]} />
+        <TopBar pageName={pageNames[activeTab]} onNavigateToSection={handleNavigateToSection} />
         {renderContent()}
       </div>
 

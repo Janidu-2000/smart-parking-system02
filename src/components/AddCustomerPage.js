@@ -4,8 +4,12 @@ import DesignerCanvas from './designer/DesignerCanvas';
 import styles from '../styles/styles';
 import { addBookingToFirestore } from '../services/bookingService';
 import { getParkingSlotsWithStatus } from '../services/slotService';
+import { useResponsive, getResponsiveStyles } from '../utils/responsive';
 
 const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdateSlot, onBookingAdded, parkId }) => {
+  const screenSize = useResponsive();
+  const responsiveStyles = getResponsiveStyles(screenSize);
+  
   const [showBookingForm, setShowBookingForm] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -175,14 +179,18 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
   };
 
   return (
-    <div style={styles.dashboardContainer}>
-      <div style={styles.contentWrapper}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-          <h1 style={styles.pageTitle}>Add Customer - Parking Booking</h1>
+    <div style={responsiveStyles.container}>
+      <div style={responsiveStyles.header}>
+        <div>
+          <h1 style={responsiveStyles.title}>Add Customer - Parking Booking</h1>
+          <p style={responsiveStyles.subtitle}>
+            Click on any available parking slot to create a new booking
+          </p>
         </div>
+      </div>
 
         {/* Instructions */}
-        <div style={{ ...styles.analyticsCard, marginBottom: '24px', backgroundColor: '#dbeafe', border: '1px solid #93c5fd' }}>
+        {/* <div style={{ ...styles.analyticsCard, marginBottom: '24px', backgroundColor: '#dbeafe', border: '1px solid #93c5fd' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <Car size={24} color="#2563eb" />
             <div>
@@ -199,17 +207,23 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
               )}
             </div>
           </div>
-        </div>
+        </div> */}
 
         {/* Parking Design Status */}
-        <div style={styles.analyticsCard}>
-          <h2 style={{ ...styles.sectionTitle, fontSize: '20px', marginBottom: '16px' }}>
+        <div style={responsiveStyles.analyticsCard}>
+          <h2 style={{ 
+            ...responsiveStyles.analyticsCardTitle, 
+            fontSize: screenSize.isMobile ? '16px' : screenSize.isSmallTablet ? '18px' : '20px', 
+            marginBottom: '16px',
+            color: '#1e293b',
+            fontWeight: '600'
+          }}>
             Available Parking Slots
           </h2>
           <div style={{ 
             position: 'relative', 
             width: '100%', 
-            height: '500px', 
+            height: screenSize.isMobile ? '300px' : screenSize.isSmallTablet ? '400px' : '500px', 
             backgroundColor: '#f3f4f6',
             border: '1px solid #e5e7eb',
             borderRadius: '8px',
@@ -248,18 +262,42 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
           </div>
 
           {/* Legend */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: '24px', marginTop: '20px', flexWrap: 'wrap' }}>
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: screenSize.isMobile ? '12px' : '24px', 
+            marginTop: '20px', 
+            flexWrap: 'wrap' 
+          }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '20px', height: '3px', backgroundColor: '#10b981' }}></div>
-              <span style={{ fontSize: '14px' }}>Available (Click to Book)</span>
+              <div style={{ 
+                width: screenSize.isMobile ? '16px' : '20px', 
+                height: '3px', 
+                backgroundColor: '#10b981' 
+              }}></div>
+              <span style={{ 
+                fontSize: screenSize.isMobile ? '12px' : '14px' 
+              }}>Available (Click to Book)</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '20px', height: '3px', backgroundColor: '#ef4444' }}></div>
-              <span style={{ fontSize: '14px' }}>Occupied</span>
+              <div style={{ 
+                width: screenSize.isMobile ? '16px' : '20px', 
+                height: '3px', 
+                backgroundColor: '#ef4444' 
+              }}></div>
+              <span style={{ 
+                fontSize: screenSize.isMobile ? '12px' : '14px' 
+              }}>Occupied</span>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <div style={{ width: '20px', height: '3px', backgroundColor: '#eab308' }}></div>
-              <span style={{ fontSize: '14px' }}>Reserved</span>
+              <div style={{ 
+                width: screenSize.isMobile ? '16px' : '20px', 
+                height: '3px', 
+                backgroundColor: '#eab308' 
+              }}></div>
+              <span style={{ 
+                fontSize: screenSize.isMobile ? '12px' : '14px' 
+              }}>Reserved</span>
             </div>
           </div>
           
@@ -267,14 +305,14 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
           <div style={{ 
             textAlign: 'center', 
             marginTop: '12px', 
-            padding: '8px 16px', 
+            padding: screenSize.isMobile ? '6px 12px' : '8px 16px', 
             backgroundColor: '#f8fafc', 
             borderRadius: '6px',
             border: '1px solid #e2e8f0'
           }}>
             <p style={{ 
               margin: '0', 
-              fontSize: '12px', 
+              fontSize: screenSize.isMobile ? '11px' : '12px', 
               color: '#64748b',
               fontStyle: 'italic'
             }}>
@@ -285,54 +323,36 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
 
         {/* Booking Form Modal */}
         {showBookingForm && (
-          <div style={{
-            position: 'fixed',
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: 'rgba(0, 0, 0, 0.5)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            zIndex: 10000,
-            padding: '20px'
-          }}>
+          <div style={responsiveStyles.modal}>
             <div style={{
-              backgroundColor: 'white',
-              borderRadius: '16px',
-              width: '95%',
-              maxWidth: '900px',
-              maxHeight: '95vh',
-              display: 'flex',
-              flexDirection: 'column',
-              boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
-              border: '1px solid #e5e7eb'
+              ...responsiveStyles.modalContent,
+              maxWidth: screenSize.isMobile ? '95vw' : screenSize.isSmallTablet ? '90vw' : '900px',
+              maxHeight: screenSize.isMobile ? '95vh' : '95vh'
             }}>
               {/* Header */}
               <div style={{ 
                 display: 'flex', 
                 justifyContent: 'space-between', 
                 alignItems: 'center', 
-                padding: '24px 32px 20px 32px',
+                padding: screenSize.isMobile ? '16px 20px 12px 20px' : '24px 32px 20px 32px',
                 borderBottom: '1px solid #f3f4f6'
               }}>
                 <div>
                   <h2 style={{ 
                     margin: 0, 
-                    fontSize: '24px', 
+                    fontSize: screenSize.isMobile ? '18px' : screenSize.isSmallTablet ? '20px' : '24px', 
                     fontWeight: '700', 
                     color: '#111827',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px'
+                    gap: screenSize.isMobile ? '8px' : '12px'
                   }}>
-                    <User size={24} />
+                    <User size={screenSize.isMobile ? 18 : 24} />
                     Add Customer Booking
                   </h2>
                   <p style={{ 
                     margin: '4px 0 0 0', 
-                    fontSize: '14px', 
+                    fontSize: screenSize.isMobile ? '12px' : '14px', 
                     color: '#6b7280' 
                   }}>
                     Create a new parking reservation
@@ -344,7 +364,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                     background: 'none',
                     border: 'none',
                     cursor: 'pointer',
-                    padding: '8px',
+                    padding: screenSize.isMobile ? '6px' : '8px',
                     borderRadius: '8px',
                     color: '#6b7280',
                     transition: 'all 0.2s',
@@ -361,63 +381,67 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                     e.target.style.color = '#6b7280';
                   }}
                 >
-                  <X size={20} />
+                  <X size={screenSize.isMobile ? 16 : 20} />
                 </button>
               </div>
 
               {/* Content */}
               <div style={{ 
                 flex: 1, 
-                padding: '0 32px 32px 32px',
+                padding: screenSize.isMobile ? '0 16px 16px 16px' : '0 32px 32px 32px',
                 overflow: 'hidden',
                 display: 'flex',
                 flexDirection: 'column'
               }}>
                 {/* Selected Slot Info */}
                 <div style={{ 
-                  marginBottom: '24px', 
-                  padding: '16px 20px', 
+                  marginBottom: screenSize.isMobile ? '16px' : '24px', 
+                  padding: screenSize.isMobile ? '12px 16px' : '16px 20px', 
                   backgroundColor: '#f8fafc', 
                   borderRadius: '12px',
                   border: '1px solid #e2e8f0'
                 }}>
                   <h3 style={{ 
                     margin: '0 0 8px 0', 
-                    fontSize: '16px', 
+                    fontSize: screenSize.isMobile ? '14px' : '16px', 
                     fontWeight: '600',
                     color: '#1e293b',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '8px'
                   }}>
-                    <Car size={18} />
+                    <Car size={screenSize.isMobile ? 16 : 18} />
                     Selected Slot: {selectedSlot?.id}
                   </h3>
                   {parkId && (
                     <div style={{ 
                       margin: '0 0 8px 0', 
-                      fontSize: '12px', 
+                      fontSize: screenSize.isMobile ? '11px' : '12px', 
                       color: '#64748b',
                       fontStyle: 'italic'
                     }}>
                       <p style={{ margin: '0 0 4px 0' }}>
                         Park ID: {parkId.substring(0, 8)}...
                       </p>
-                      <p style={{ margin: '0', fontSize: '11px', color: '#94a3b8' }}>
+                      <p style={{ margin: '0', fontSize: screenSize.isMobile ? '10px' : '11px', color: '#94a3b8' }}>
                         Unique Slot ID: {parkId.substring(0, 8)}..._{selectedSlot?.id}
                       </p>
                     </div>
                   )}
                   <div style={{ 
                     display: 'flex', 
-                    gap: '24px', 
-                    fontSize: '14px', 
+                    gap: screenSize.isMobile ? '16px' : '24px', 
+                    fontSize: screenSize.isMobile ? '12px' : '14px', 
                     color: '#64748b',
                     flexWrap: 'wrap'
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <span style={{ fontWeight: '500' }}>Price:</span>
-                      <span style={{ fontWeight: '600', color: '#059669', fontSize: '15px' }}>
+                      <span style={{ 
+                        fontWeight: '600', 
+                        color: '#059669', 
+                        fontSize: screenSize.isMobile ? '13px' : '15px' 
+                      }}>
                         ${selectedSlot?.price || 5.00}/hour
                       </span>
                     </div>
@@ -427,13 +451,13 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                 {/* Messages */}
                 {successMessage && (
                   <div style={{
-                    marginBottom: '20px',
-                    padding: '12px 16px',
+                    marginBottom: screenSize.isMobile ? '16px' : '20px',
+                    padding: screenSize.isMobile ? '10px 12px' : '12px 16px',
                     backgroundColor: '#d1fae5',
                     border: '1px solid #10b981',
                     borderRadius: '8px',
                     color: '#065f46',
-                    fontSize: '14px',
+                    fontSize: screenSize.isMobile ? '12px' : '14px',
                     fontWeight: '500',
                     display: 'flex',
                     alignItems: 'center',
@@ -445,13 +469,13 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
 
                 {errorMessage && (
                   <div style={{
-                    marginBottom: '20px',
-                    padding: '12px 16px',
+                    marginBottom: screenSize.isMobile ? '16px' : '20px',
+                    padding: screenSize.isMobile ? '10px 12px' : '12px 16px',
                     backgroundColor: '#fee2e2',
                     border: '1px solid #ef4444',
                     borderRadius: '8px',
                     color: '#991b1b',
-                    fontSize: '14px',
+                    fontSize: screenSize.isMobile ? '12px' : '14px',
                     fontWeight: '500',
                     display: 'flex',
                     alignItems: 'center',
@@ -465,19 +489,19 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                 <form onSubmit={handleBookingSubmit} style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
                   <div style={{ 
                     display: 'grid', 
-                    gridTemplateColumns: '1fr 1fr', 
-                    gap: '20px',
+                    gridTemplateColumns: screenSize.isMobile ? '1fr' : '1fr 1fr', 
+                    gap: screenSize.isMobile ? '16px' : '20px',
                     flex: 1,
                     minHeight: 0
                   }}>
                     {/* Left Column */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: screenSize.isMobile ? '16px' : '20px' }}>
                       {/* Customer Name */}
                       <div>
                         <label style={{ 
                           display: 'block', 
                           marginBottom: '8px', 
-                          fontSize: '14px', 
+                          fontSize: screenSize.isMobile ? '13px' : '14px', 
                           fontWeight: '600', 
                           color: '#374151' 
                         }}>
@@ -490,10 +514,10 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                           onChange={(e) => handleInputChange('customerName', e.target.value)}
                           style={{
                             width: '100%',
-                            padding: '12px 16px',
+                            padding: screenSize.isMobile ? '10px 12px' : '12px 16px',
                             border: '1px solid #d1d5db',
                             borderRadius: '8px',
-                            fontSize: '14px',
+                            fontSize: screenSize.isMobile ? '13px' : '14px',
                             boxSizing: 'border-box',
                             transition: 'border-color 0.2s'
                           }}
@@ -508,7 +532,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         <label style={{ 
                           display: 'block', 
                           marginBottom: '8px', 
-                          fontSize: '14px', 
+                          fontSize: screenSize.isMobile ? '13px' : '14px', 
                           fontWeight: '600', 
                           color: '#374151' 
                         }}>
@@ -521,10 +545,10 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                           onChange={(e) => handleInputChange('phoneNumber', e.target.value)}
                           style={{
                             width: '100%',
-                            padding: '12px 16px',
+                            padding: screenSize.isMobile ? '10px 12px' : '12px 16px',
                             border: '1px solid #d1d5db',
                             borderRadius: '8px',
-                            fontSize: '14px',
+                            fontSize: screenSize.isMobile ? '13px' : '14px',
                             boxSizing: 'border-box',
                             transition: 'border-color 0.2s'
                           }}
@@ -539,7 +563,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         <label style={{ 
                           display: 'block', 
                           marginBottom: '8px', 
-                          fontSize: '14px', 
+                          fontSize: screenSize.isMobile ? '13px' : '14px', 
                           fontWeight: '600', 
                           color: '#374151' 
                         }}>
@@ -552,10 +576,10 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                           onChange={(e) => handleInputChange('vehicleNumber', e.target.value)}
                           style={{
                             width: '100%',
-                            padding: '12px 16px',
+                            padding: screenSize.isMobile ? '10px 12px' : '12px 16px',
                             border: '1px solid #d1d5db',
                             borderRadius: '8px',
-                            fontSize: '14px',
+                            fontSize: screenSize.isMobile ? '13px' : '14px',
                             boxSizing: 'border-box',
                             transition: 'border-color 0.2s'
                           }}
@@ -570,7 +594,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         <label style={{ 
                           display: 'block', 
                           marginBottom: '8px', 
-                          fontSize: '14px', 
+                          fontSize: screenSize.isMobile ? '13px' : '14px', 
                           fontWeight: '600', 
                           color: '#374151' 
                         }}>
@@ -581,10 +605,10 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                           onChange={(e) => handleInputChange('vehicleType', e.target.value)}
                           style={{
                             width: '100%',
-                            padding: '12px 16px',
+                            padding: screenSize.isMobile ? '10px 12px' : '12px 16px',
                             border: '1px solid #d1d5db',
                             borderRadius: '8px',
-                            fontSize: '14px',
+                            fontSize: screenSize.isMobile ? '13px' : '14px',
                             backgroundColor: 'white',
                             boxSizing: 'border-box',
                             transition: 'border-color 0.2s'
@@ -601,13 +625,13 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                     </div>
 
                     {/* Right Column */}
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: screenSize.isMobile ? '16px' : '20px' }}>
                       {/* Duration */}
                       <div>
                         <label style={{ 
                           display: 'block', 
                           marginBottom: '8px', 
-                          fontSize: '14px', 
+                          fontSize: screenSize.isMobile ? '13px' : '14px', 
                           fontWeight: '600', 
                           color: '#374151' 
                         }}>
@@ -621,10 +645,10 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                           onChange={(e) => handleInputChange('duration', parseInt(e.target.value))}
                           style={{
                             width: '100%',
-                            padding: '12px 16px',
+                            padding: screenSize.isMobile ? '10px 12px' : '12px 16px',
                             border: '1px solid #d1d5db',
                             borderRadius: '8px',
-                            fontSize: '14px',
+                            fontSize: screenSize.isMobile ? '13px' : '14px',
                             boxSizing: 'border-box',
                             transition: 'border-color 0.2s'
                           }}
@@ -638,13 +662,17 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         <label style={{ 
                           display: 'block', 
                           marginBottom: '8px', 
-                          fontSize: '14px', 
+                          fontSize: screenSize.isMobile ? '13px' : '14px', 
                           fontWeight: '600', 
                           color: '#374151' 
                         }}>
                           Date Range (Optional)
                         </label>
-                        <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{ 
+                          display: 'flex', 
+                          gap: screenSize.isMobile ? '8px' : '12px',
+                          flexDirection: screenSize.isMobile ? 'column' : 'row'
+                        }}>
                           <div style={{ flex: 1 }}>
                             <input
                               type="date"
@@ -652,10 +680,10 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                               onChange={(e) => handleInputChange('startDate', e.target.value)}
                               style={{
                                 width: '100%',
-                                padding: '12px 16px',
+                                padding: screenSize.isMobile ? '10px 12px' : '12px 16px',
                                 border: '1px solid #d1d5db',
                                 borderRadius: '8px',
-                                fontSize: '14px',
+                                fontSize: screenSize.isMobile ? '13px' : '14px',
                                 boxSizing: 'border-box',
                                 transition: 'border-color 0.2s'
                               }}
@@ -671,10 +699,10 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                               min={bookingForm.startDate}
                               style={{
                                 width: '100%',
-                                padding: '12px 16px',
+                                padding: screenSize.isMobile ? '10px 12px' : '12px 16px',
                                 border: '1px solid #d1d5db',
                                 borderRadius: '8px',
-                                fontSize: '14px',
+                                fontSize: screenSize.isMobile ? '13px' : '14px',
                                 boxSizing: 'border-box',
                                 transition: 'border-color 0.2s'
                               }}
@@ -685,7 +713,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         </div>
                         <p style={{ 
                           margin: '6px 0 0 0', 
-                          fontSize: '12px', 
+                          fontSize: screenSize.isMobile ? '11px' : '12px', 
                           color: '#6b7280' 
                         }}>
                           If no date range is selected, current date will be used
@@ -694,7 +722,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
 
                       {/* Amount Calculation */}
                       <div style={{ 
-                        padding: '16px', 
+                        padding: screenSize.isMobile ? '12px' : '16px', 
                         backgroundColor: '#f8fafc', 
                         border: '1px solid #e2e8f0', 
                         borderRadius: '12px',
@@ -702,7 +730,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                       }}>
                         <h4 style={{ 
                           margin: '0 0 12px 0', 
-                          fontSize: '15px', 
+                          fontSize: screenSize.isMobile ? '13px' : '15px', 
                           fontWeight: '600', 
                           color: '#1e293b',
                           display: 'flex',
@@ -711,14 +739,19 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         }}>
                           💰 Amount Calculation
                         </h4>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', fontSize: '13px' }}>
+                        <div style={{ 
+                          display: 'grid', 
+                          gridTemplateColumns: screenSize.isMobile ? '1fr' : '1fr 1fr', 
+                          gap: '8px', 
+                          fontSize: screenSize.isMobile ? '12px' : '13px' 
+                        }}>
                           <div>
                             <span style={{ color: '#64748b', fontWeight: '500' }}>Slot Price:</span>
                             <span style={{ 
                               marginLeft: '6px', 
                               fontWeight: '600', 
                               color: '#059669',
-                              fontSize: '14px'
+                              fontSize: screenSize.isMobile ? '13px' : '14px'
                             }}>
                               ${selectedSlot?.price || 5.00}/hour
                             </span>
@@ -739,10 +772,10 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         </div>
                         <div style={{ 
                           marginTop: '8px', 
-                          padding: '8px 12px', 
+                          padding: screenSize.isMobile ? '6px 10px' : '8px 12px', 
                           backgroundColor: '#e2e8f0', 
                           borderRadius: '6px',
-                          fontSize: '12px',
+                          fontSize: screenSize.isMobile ? '11px' : '12px',
                           color: '#475569'
                         }}>
                           <span style={{ fontWeight: '500' }}>Calculation:</span> 
@@ -753,14 +786,14 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         </div>
                         <div style={{ 
                           marginTop: '10px', 
-                          padding: '10px', 
+                          padding: screenSize.isMobile ? '8px' : '10px', 
                           backgroundColor: '#2563eb', 
                           borderRadius: '6px',
                           textAlign: 'center'
                         }}>
                           <span style={{ 
                             color: 'white', 
-                            fontSize: '16px', 
+                            fontSize: screenSize.isMobile ? '14px' : '16px', 
                             fontWeight: '700'
                           }}>
                             Total Amount: ${totalAmount}
@@ -773,22 +806,23 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                   {/* Submit Buttons */}
                   <div style={{ 
                     display: 'flex', 
-                    gap: '12px', 
-                    marginTop: '24px',
-                    paddingTop: '20px',
-                    borderTop: '1px solid #f3f4f6'
+                    gap: screenSize.isMobile ? '8px' : '12px', 
+                    marginTop: screenSize.isMobile ? '16px' : '24px',
+                    paddingTop: screenSize.isMobile ? '16px' : '20px',
+                    borderTop: '1px solid #f3f4f6',
+                    flexDirection: screenSize.isMobile ? 'column' : 'row'
                   }}>
                     <button
                       type="submit"
                       disabled={isSubmitting}
                       style={{
                         flex: 1,
-                        padding: '14px 24px',
+                        padding: screenSize.isMobile ? '12px 20px' : '14px 24px',
                         backgroundColor: isSubmitting ? '#9ca3af' : '#2563eb',
                         color: 'white',
                         border: 'none',
                         borderRadius: '8px',
-                        fontSize: '14px',
+                        fontSize: screenSize.isMobile ? '13px' : '14px',
                         fontWeight: '600',
                         cursor: isSubmitting ? 'not-allowed' : 'pointer',
                         transition: 'all 0.2s',
@@ -804,8 +838,8 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                       {isSubmitting ? (
                         <>
                           <div style={{ 
-                            width: '16px', 
-                            height: '16px', 
+                            width: screenSize.isMobile ? '14px' : '16px', 
+                            height: screenSize.isMobile ? '14px' : '16px', 
                             border: '2px solid transparent', 
                             borderTop: '2px solid white', 
                             borderRadius: '50%', 
@@ -815,7 +849,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         </>
                       ) : (
                         <>
-                          <User size={16} />
+                          <User size={screenSize.isMobile ? 14 : 16} />
                           Create Booking
                         </>
                       )}
@@ -824,12 +858,12 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                       type="button"
                       onClick={() => setShowBookingForm(false)}
                       style={{
-                        padding: '14px 24px',
+                        padding: screenSize.isMobile ? '12px 20px' : '14px 24px',
                         backgroundColor: '#f3f4f6',
                         color: '#374151',
                         border: '1px solid #d1d5db',
                         borderRadius: '8px',
-                        fontSize: '14px',
+                        fontSize: screenSize.isMobile ? '13px' : '14px',
                         fontWeight: '600',
                         cursor: 'pointer',
                         transition: 'all 0.2s',
@@ -840,7 +874,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                       onMouseOver={(e) => e.target.style.backgroundColor = '#e5e7eb'}
                       onMouseOut={(e) => e.target.style.backgroundColor = '#f3f4f6'}
                     >
-                      <X size={16} />
+                      <X size={screenSize.isMobile ? 14 : 16} />
                       Cancel
                     </button>
                   </div>
@@ -850,8 +884,9 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
           </div>
         )}
       </div>
-    </div>
+   
   );
 };
 
 export default AddCustomerPage;
+

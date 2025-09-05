@@ -42,25 +42,80 @@ export const getPaymentsFromFirestore = async () => {
     }
 
     console.log('Fetching payments for user:', authUser.email, 'parkId:', authUser.uid);
-    const paymentsRef = collection(db, 'payments');
-    const q = query(paymentsRef, where('parkId', '==', authUser.uid));
-    const querySnapshot = await getDocs(q);
     
-    const payments = [];
-    querySnapshot.forEach((doc) => {
-      const payment = {
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate?.() || new Date()
-      };
-      payments.push(payment);
+    const allPayments = [];
+    
+    // Fetch from paymentHistory collection (primary source)
+    try {
+      console.log('Fetching from paymentHistory collection...');
+      const paymentHistoryRef = collection(db, 'paymentHistory');
+      const paymentHistoryQuery = query(paymentHistoryRef, where('parkId', '==', authUser.uid));
+      const paymentHistorySnapshot = await getDocs(paymentHistoryQuery);
+      
+      paymentHistorySnapshot.forEach((doc) => {
+        const payment = {
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+          paymentDate: doc.data().paymentDate?.toDate?.() || doc.data().date?.toDate?.() || new Date(),
+          source: 'paymentHistory'
+        };
+        allPayments.push(payment);
+      });
+      
+      console.log('Fetched from paymentHistory:', paymentHistorySnapshot.size);
+    } catch (paymentHistoryError) {
+      console.warn('Error fetching from paymentHistory:', paymentHistoryError);
+    }
+    
+    // Also fetch from payments collection for backward compatibility
+    try {
+      console.log('Fetching from payments collection...');
+      const paymentsRef = collection(db, 'payments');
+      const paymentsQuery = query(paymentsRef, where('parkId', '==', authUser.uid));
+      const paymentsSnapshot = await getDocs(paymentsQuery);
+      
+      paymentsSnapshot.forEach((doc) => {
+        const payment = {
+          id: doc.id,
+          ...doc.data(),
+          createdAt: doc.data().createdAt?.toDate?.() || new Date(),
+          paymentDate: doc.data().paymentDate?.toDate?.() || doc.data().date?.toDate?.() || new Date(),
+          source: 'payments'
+        };
+        allPayments.push(payment);
+      });
+      
+      console.log('Fetched from payments:', paymentsSnapshot.size);
+    } catch (paymentsError) {
+      console.warn('Error fetching from payments:', paymentsError);
+    }
+
+    // Remove duplicates based on bookingId and slotId combination
+    const uniquePayments = [];
+    const seenCombinations = new Set();
+    
+    allPayments.forEach(payment => {
+      const key = `${payment.bookingId || payment.id}_${payment.slotId}`;
+      if (!seenCombinations.has(key)) {
+        seenCombinations.add(key);
+        uniquePayments.push(payment);
+      } else {
+        // If duplicate found, prefer paymentHistory over payments
+        const existingIndex = uniquePayments.findIndex(p => 
+          `${p.bookingId || p.id}_${p.slotId}` === key
+        );
+        if (existingIndex !== -1 && payment.source === 'paymentHistory' && uniquePayments[existingIndex].source === 'payments') {
+          uniquePayments[existingIndex] = payment;
+        }
+      }
     });
 
     // Sort by creation date (newest first)
-    payments.sort((a, b) => b.createdAt - a.createdAt);
+    uniquePayments.sort((a, b) => b.createdAt - a.createdAt);
     
-    console.log('Fetched payments:', payments.length);
-    return payments;
+    console.log('Total unique payments fetched:', uniquePayments.length);
+    return uniquePayments;
   } catch (error) {
     console.error('Error getting payments from Firestore:', error);
     return [];

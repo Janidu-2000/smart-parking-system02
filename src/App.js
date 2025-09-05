@@ -6,7 +6,6 @@ import { auth } from './config/firebaseConfig';
 import AdminDashboard from './components/AdminDashboard';
 import DriverInterface from './components/DriverInterface';
 import NotificationCenter from './components/NotificationCenter';
-import GlobalFloatingNotification from './components/GlobalFloatingNotification';
 import { NotificationProvider, useNotifications } from './contexts/NotificationContext';
 import { generateMockData, mockAnalytics, mockMessages, mockPayments } from './data/mockData';
 import { getBookingsFromFirestore, updateBookingStatusInFirestore, updateBookingDetailsInFirestore, cancelBookingInFirestore, approveBookingInFirestore, deleteBookingFromFirestore } from './services/bookingService';
@@ -355,8 +354,6 @@ const SmartParkingAppContent = () => {
         onNavigateToSection={handleNavigateToSection}
       />
 
-      {/* Global Floating Notification */}
-      <GlobalFloatingNotification onNavigateToSection={handleNavigateToSection} />
       
       {/* Edit Booking Modal */}
       <EditBookingModal

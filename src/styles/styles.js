@@ -774,6 +774,69 @@ const styles = {
     borderRadius: '10px',
     minWidth: '20px',
     textAlign: 'center'
+  },
+
+  // Dropdown Notification Styles
+  notificationDropdown: {
+    backgroundColor: '#ffffff',
+    borderRadius: '8px',
+    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1)',
+    border: '1px solid #e5e7eb',
+    zIndex: 1000,
+    maxHeight: '400px',
+    overflowY: 'auto'
+  },
+  quickActions: {
+    padding: '8px 0',
+    borderBottom: '1px solid #e5e7eb'
+  },
+  quickAction: {
+    padding: '12px 16px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    ':hover': {
+      backgroundColor: '#f9fafb'
+    }
+  },
+  quickActionContent: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    flex: 1
+  },
+  quickActionText: {
+    fontSize: '14px',
+    fontWeight: '500',
+    color: '#374151'
+  },
+  quickActionCount: {
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#ef4444',
+    backgroundColor: '#fef2f2',
+    padding: '2px 8px',
+    borderRadius: '10px',
+    marginLeft: '8px'
+  },
+  viewAllButton: {
+    padding: '12px 16px',
+    borderTop: '1px solid #e5e7eb',
+    textAlign: 'center'
+  },
+  viewAllButtonText: {
+    background: 'none',
+    border: 'none',
+    color: '#2563eb',
+    fontSize: '14px',
+    fontWeight: '500',
+    cursor: 'pointer',
+    textDecoration: 'underline',
+    ':hover': {
+      color: '#1d4ed8'
+    }
   }
 };
 
