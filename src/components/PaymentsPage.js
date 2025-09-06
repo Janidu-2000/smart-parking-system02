@@ -566,7 +566,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         <button
           onClick={() => handleViewFullRecord(booking)}
           style={{
-            padding: '8px 16px',
+                                padding: screenSize.isMobile ? '6px 12px' : '8px 16px',
             backgroundColor: '#3b82f6',
             color: 'white',
             border: 'none',
@@ -589,7 +589,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         <button
           onClick={() => handleMakePayment(booking)}
           style={{
-            padding: '8px 16px',
+                                padding: screenSize.isMobile ? '6px 12px' : '8px 16px',
             backgroundColor: '#059669',
               color: 'white',
               border: 'none',
@@ -681,12 +681,6 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
       {/* Important Details Only */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
         <div>
-          <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 4px 0', fontWeight: '500' }}>Payment ID</p>
-          <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#3b82f6', fontFamily: 'monospace' }}>
-            {payment.id ? `#${payment.id.slice(-6)}` : 'N/A'}
-          </p>
-        </div>
-        <div>
           <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 4px 0', fontWeight: '500' }}>Slot</p>
           <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#059669' }}>
             {payment.slotId || 'N/A'}
@@ -722,7 +716,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         <button
           onClick={() => handleViewFullRecord(payment)}
           style={{
-            padding: '8px 16px',
+                                padding: screenSize.isMobile ? '6px 12px' : '8px 16px',
             backgroundColor: '#3b82f6',
             color: 'white',
             border: 'none',
@@ -747,46 +741,124 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
   );
 
   return (
-    <div style={responsiveStyles.container}>
-      {/* Header */}
-      <div style={responsiveStyles.header}>
+    <div style={{
+      ...responsiveStyles.container,
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+      minHeight: '100vh'
+    }}>
+      {/* Professional Header */}
+      <div style={{
+        ...responsiveStyles.header,
+        background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+        color: 'white',
+        padding: screenSize.isMobile ? '16px 20px' : screenSize.isSmallTablet ? '20px 24px' : '24px 32px',
+        borderRadius: screenSize.isMobile ? '12px' : '16px',
+        marginBottom: screenSize.isMobile ? '16px' : '24px',
+        boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
+        border: '1px solid rgba(255,255,255,0.1)'
+      }}>
         <div>
-          <h2 style={responsiveStyles.title}>Payment Records</h2>
-          <p style={responsiveStyles.subtitle}>
+          <h2 style={{
+            ...responsiveStyles.title,
+            color: 'white',
+            fontSize: screenSize.isMobile ? '20px' : screenSize.isSmallTablet ? '24px' : '28px',
+            fontWeight: '700',
+            marginBottom: screenSize.isMobile ? '6px' : '8px',
+            background: 'linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            backgroundClip: 'text'
+          }}>
+            💳 Payment Management
+          </h2>
+          <p style={{
+            ...responsiveStyles.subtitle,
+            color: 'rgba(255,255,255,0.8)',
+            fontSize: screenSize.isMobile ? '13px' : screenSize.isSmallTablet ? '14px' : '16px',
+            fontWeight: '500'
+          }}>
             {activeTab === 'pending' 
-              ? `${filteredApprovedBookings.length} of ${approvedBookings.length} approved reservation(s)`
+              ? `${filteredApprovedBookings.length} of ${approvedBookings.length} pending payment(s)`
               : `${filteredCompletedPayments.length} of ${completedPayments.length} completed payment(s)`
             }
           </p>
         </div>
         
-        {/* Download Button */}
+        {/* Professional Download Button */}
         <div style={responsiveStyles.buttonContainer}>
           <button
             onClick={downloadPaymentsData}
-            style={{ ...responsiveStyles.button, backgroundColor: '#059669' }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#047857'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#059669'}
+            style={{
+              ...responsiveStyles.button,
+              background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+              color: 'white',
+              border: 'none',
+              padding: screenSize.isMobile ? '10px 16px' : '12px 24px',
+              borderRadius: screenSize.isMobile ? '8px' : '12px',
+              fontSize: screenSize.isMobile ? '13px' : '14px',
+              fontWeight: '600',
+              boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)',
+              transition: 'all 0.3s ease',
+              display: 'flex',
+              alignItems: 'center',
+              gap: screenSize.isMobile ? '6px' : '8px'
+            }}
+            onMouseOver={(e) => {
+              e.target.style.transform = 'translateY(-2px)';
+              e.target.style.boxShadow = '0 6px 16px rgba(5, 150, 105, 0.4)';
+            }}
+            onMouseOut={(e) => {
+              e.target.style.transform = 'translateY(0)';
+              e.target.style.boxShadow = '0 4px 12px rgba(5, 150, 105, 0.3)';
+            }}
             disabled={filteredCompletedPayments.length === 0}
           >
             <FileText size={screenSize.isMobile ? 14 : 16} />
-            {screenSize.isMobile ? 'Download' : 'Download Report'}
+            {screenSize.isMobile ? 'Download' : 'Export Report'}
           </button>
         </div>
       </div>
 
-      {/* Tab Navigation */}
-      <div style={tabStyles.tabContainer}>
+      {/* Professional Tab Navigation */}
+      <div style={{
+        ...tabStyles.tabContainer,
+        background: 'white',
+        borderRadius: screenSize.isMobile ? '12px' : '16px',
+        padding: screenSize.isMobile ? '6px' : '8px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        border: '1px solid #e2e8f0',
+        marginBottom: screenSize.isMobile ? '16px' : '24px'
+      }}>
         <button
           onClick={() => setActiveTab('pending')}
           style={{
             ...tabStyles.tab,
-            ...(activeTab === 'pending' ? tabStyles.activeTab : {})
+            background: activeTab === 'pending' 
+              ? 'linear-gradient(135deg, #fef3c7 0%, #fde047 100%)' 
+              : 'transparent',
+            color: activeTab === 'pending' ? '#92400e' : '#64748b',
+            border: activeTab === 'pending' ? '1px solid #f59e0b' : '1px solid transparent',
+            borderRadius: screenSize.isMobile ? '8px' : '12px',
+            padding: screenSize.isMobile ? '10px 16px' : '12px 20px',
+            fontWeight: '600',
+            fontSize: screenSize.isMobile ? '13px' : '14px',
+            transition: 'all 0.3s ease',
+            boxShadow: activeTab === 'pending' ? '0 2px 8px rgba(245, 158, 11, 0.2)' : 'none'
           }}
         >
-          <span>Need to Payment</span>
-          <span style={tabStyles.tabBadge}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            ⏳ Pending Payments
+            <span style={{
+              ...tabStyles.tabBadge,
+              background: activeTab === 'pending' ? '#92400e' : '#e2e8f0',
+              color: activeTab === 'pending' ? 'white' : '#64748b',
+              borderRadius: screenSize.isMobile ? '8px' : '12px',
+              padding: screenSize.isMobile ? '2px 6px' : '2px 8px',
+              fontSize: screenSize.isMobile ? '11px' : '12px',
+              fontWeight: '700'
+            }}>
             {approvedBookings.length}
+            </span>
           </span>
         </button>
         
@@ -794,68 +866,147 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           onClick={() => setActiveTab('completed')}
           style={{
             ...tabStyles.tab,
-            ...(activeTab === 'completed' ? tabStyles.activeTab : {})
+            background: activeTab === 'completed' 
+              ? 'linear-gradient(135deg, #dcfce7 0%, #86efac 100%)' 
+              : 'transparent',
+            color: activeTab === 'completed' ? '#166534' : '#64748b',
+            border: activeTab === 'completed' ? '1px solid #22c55e' : '1px solid transparent',
+            borderRadius: screenSize.isMobile ? '8px' : '12px',
+            padding: screenSize.isMobile ? '10px 16px' : '12px 20px',
+            fontWeight: '600',
+            fontSize: screenSize.isMobile ? '13px' : '14px',
+            transition: 'all 0.3s ease',
+            boxShadow: activeTab === 'completed' ? '0 2px 8px rgba(34, 197, 94, 0.2)' : 'none'
           }}
         >
-          <span>Payment Successful</span>
-          <span style={tabStyles.tabBadge}>
+          <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            ✅ Completed Payments
+            <span style={{
+              ...tabStyles.tabBadge,
+              background: activeTab === 'completed' ? '#166534' : '#e2e8f0',
+              color: activeTab === 'completed' ? 'white' : '#64748b',
+              borderRadius: screenSize.isMobile ? '8px' : '12px',
+              padding: screenSize.isMobile ? '2px 6px' : '2px 8px',
+              fontSize: screenSize.isMobile ? '11px' : '12px',
+              fontWeight: '700'
+            }}>
             {completedPayments.length}
+            </span>
           </span>
         </button>
       </div>
 
-      {/* Search and Filter */}
-      <div style={responsiveStyles.searchContainer}>
+      {/* Professional Search and Filter */}
+      <div style={{
+        ...responsiveStyles.searchContainer,
+        background: 'white',
+        borderRadius: screenSize.isMobile ? '12px' : '16px',
+        padding: screenSize.isMobile ? '16px' : '20px',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+        border: '1px solid #e2e8f0',
+        marginBottom: screenSize.isMobile ? '16px' : '24px'
+      }}>
         <div style={{ position: 'relative', flex: 1 }}>
           <Search 
-            size={16} 
+            size={screenSize.isMobile ? 16 : 18} 
             style={{ 
               position: 'absolute', 
-              left: 12, 
+              left: screenSize.isMobile ? 12 : 16, 
               top: '50%', 
               transform: 'translateY(-50%)', 
-              color: '#9ca3af' 
+              color: '#6b7280' 
             }} 
           />
           <input
             type="text"
-            placeholder={activeTab === 'pending' ? "Search by name, vehicle, or slot..." : "Search by name, vehicle, slot, or payment ID..."}
+            placeholder={activeTab === 'pending' ? "🔍 Search by name, vehicle, or slot..." : "🔍 Search by name, vehicle, slot, or payment ID..."}
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            style={{ ...responsiveStyles.input, paddingLeft: 40 }}
+            style={{ 
+              ...responsiveStyles.input, 
+              paddingLeft: screenSize.isMobile ? 40 : 48,
+              padding: screenSize.isMobile ? '12px 14px 12px 40px' : '14px 16px 14px 48px',
+              borderRadius: screenSize.isMobile ? '8px' : '12px',
+              border: '2px solid #e2e8f0',
+              fontSize: screenSize.isMobile ? '13px' : '14px',
+              fontWeight: '500',
+              transition: 'all 0.3s ease',
+              background: '#f8fafc'
+            }}
+            onFocus={(e) => {
+              e.target.style.borderColor = '#3b82f6';
+              e.target.style.background = 'white';
+              e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+            }}
+            onBlur={(e) => {
+              e.target.style.borderColor = '#e2e8f0';
+              e.target.style.background = '#f8fafc';
+              e.target.style.boxShadow = 'none';
+            }}
           />
         </div>
         
         <select
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
-          style={responsiveStyles.select}
+          style={{
+            ...responsiveStyles.select,
+            padding: screenSize.isMobile ? '12px 14px' : '14px 16px',
+            borderRadius: screenSize.isMobile ? '8px' : '12px',
+            border: '2px solid #e2e8f0',
+            fontSize: screenSize.isMobile ? '13px' : '14px',
+            fontWeight: '500',
+            background: '#f8fafc',
+            transition: 'all 0.3s ease'
+          }}
         >
-          <option value="all">All Status</option>
-          <option value="completed">Completed</option>
-          <option value="pending">Pending</option>
-          <option value="failed">Failed</option>
+          <option value="all">📊 All Status</option>
+          <option value="completed">✅ Completed</option>
+          <option value="pending">⏳ Pending</option>
+          <option value="failed">❌ Failed</option>
         </select>
         
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
-          style={responsiveStyles.select}
+          style={{
+            ...responsiveStyles.select,
+            padding: screenSize.isMobile ? '12px 14px' : '14px 16px',
+            borderRadius: screenSize.isMobile ? '8px' : '12px',
+            border: '2px solid #e2e8f0',
+            fontSize: screenSize.isMobile ? '13px' : '14px',
+            fontWeight: '500',
+            background: '#f8fafc',
+            transition: 'all 0.3s ease'
+          }}
         >
-          <option value="date">Sort by Date</option>
-          <option value="amount">Sort by Amount</option>
-          <option value="name">Sort by Name</option>
+          <option value="date">📅 Sort by Date</option>
+          <option value="amount">💰 Sort by Amount</option>
+          <option value="name">👤 Sort by Name</option>
         </select>
         
         <button
           onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
           style={{
-            padding: '10px 12px',
-            backgroundColor: '#f3f4f6',
-            border: '1px solid #d1d5db',
-            borderRadius: '6px',
+            padding: screenSize.isMobile ? '12px 14px' : '14px 16px',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+            color: 'white',
+            border: 'none',
+            borderRadius: screenSize.isMobile ? '8px' : '12px',
             cursor: 'pointer',
-            fontSize: 14
+            fontSize: screenSize.isMobile ? '14px' : '16px',
+            fontWeight: '600',
+            transition: 'all 0.3s ease',
+            boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+            minWidth: screenSize.isMobile ? '40px' : '50px'
+          }}
+          onMouseOver={(e) => {
+            e.target.style.transform = 'translateY(-2px)';
+            e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+          }}
+          onMouseOut={(e) => {
+            e.target.style.transform = 'translateY(0)';
+            e.target.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
           }}
         >
           {sortOrder === 'asc' ? '↑' : '↓'}
@@ -867,122 +1018,297 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         // Show approved reservations in "Need to Payment" tab
         filteredApprovedBookings.length === 0 ? (
           <div style={{ 
-            color: '#6b7280', 
-            textAlign: 'center', 
+            background: 'white',
+            borderRadius: '16px',
             padding: screenSize.isMobile ? 40 : 60,
-            fontSize: screenSize.isMobile ? 14 : 16
+            textAlign: 'center',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+            border: '1px solid #e2e8f0'
           }}>
-            {approvedBookings.length === 0 ? 'No approved reservations found.' : 'No approved reservations match your search criteria.'}
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>⏳</div>
+            <h3 style={{ 
+              color: '#374151', 
+              fontSize: screenSize.isMobile ? 18 : 24,
+              fontWeight: '600',
+              marginBottom: '8px'
+            }}>
+              {approvedBookings.length === 0 ? 'No Pending Payments' : 'No Matching Results'}
+            </h3>
+            <p style={{ 
+              color: '#6b7280', 
+              fontSize: screenSize.isMobile ? 14 : 16,
+              margin: 0
+            }}>
+              {approvedBookings.length === 0 
+                ? 'All payments have been processed successfully.' 
+                : 'Try adjusting your search criteria to find pending payments.'
+              }
+            </p>
           </div>
         ) : (
-          <div style={responsiveStyles.tableContainer}>
+          <div style={{
+            ...responsiveStyles.tableContainer,
+            background: 'white',
+            borderRadius: screenSize.isMobile ? '12px' : '16px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+            border: '1px solid #e2e8f0',
+            overflow: 'hidden'
+          }}>
             {screenSize.isMobile ? (
               // Mobile card view for reservations
               <div style={{ padding: screenSize.isMobile ? 16 : 24 }}>
                 {filteredApprovedBookings.map((booking, index) => renderReservationMobileCard(booking, index))}
               </div>
             ) : (
-              // Desktop table view for reservations
+              // Professional Desktop table view for reservations
               <div style={{ overflowX: 'auto' }}>
-                <table style={responsiveStyles.table}>
+                <table style={{
+                  ...responsiveStyles.table,
+                  borderCollapse: 'separate',
+                  borderSpacing: 0
+                }}>
                   <thead>
-                    <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                      <th style={responsiveStyles.th}>Customer</th>
-                      <th style={responsiveStyles.th}>Vehicle</th>
-                      <th style={responsiveStyles.th}>Slot</th>
-                      <th style={responsiveStyles.th}>Active Time</th>
-                      <th style={responsiveStyles.th}>Amount</th>
-                      <th style={responsiveStyles.th}>Action</th>
+                    <tr style={{ 
+                      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                      borderBottom: '2px solid #cbd5e1'
+                    }}>
+                      <th style={{
+                        ...responsiveStyles.th,
+                        padding: screenSize.isMobile ? '12px 16px' : '16px 20px',
+                        fontSize: screenSize.isMobile ? '12px' : '14px',
+                        fontWeight: '700',
+                        color: '#374151',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        borderRight: '1px solid #e2e8f0'
+                      }}>👤 Customer</th>
+                      <th style={{
+                        ...responsiveStyles.th,
+                        padding: screenSize.isMobile ? '12px 16px' : '16px 20px',
+                        fontSize: screenSize.isMobile ? '12px' : '14px',
+                        fontWeight: '700',
+                        color: '#374151',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        borderRight: '1px solid #e2e8f0'
+                      }}>🚗 Vehicle</th>
+                      <th style={{
+                        ...responsiveStyles.th,
+                        padding: screenSize.isMobile ? '12px 16px' : '16px 20px',
+                        fontSize: screenSize.isMobile ? '12px' : '14px',
+                        fontWeight: '700',
+                        color: '#374151',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        borderRight: '1px solid #e2e8f0'
+                      }}>🅿️ Slot</th>
+                      <th style={{
+                        ...responsiveStyles.th,
+                        padding: screenSize.isMobile ? '12px 16px' : '16px 20px',
+                        fontSize: screenSize.isMobile ? '12px' : '14px',
+                        fontWeight: '700',
+                        color: '#374151',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        borderRight: '1px solid #e2e8f0'
+                      }}>⏱️ Active Time</th>
+                      <th style={{
+                        ...responsiveStyles.th,
+                        padding: screenSize.isMobile ? '12px 16px' : '16px 20px',
+                        fontSize: screenSize.isMobile ? '12px' : '14px',
+                        fontWeight: '700',
+                        color: '#374151',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px',
+                        borderRight: '1px solid #e2e8f0'
+                      }}>💰 Amount</th>
+                      <th style={{
+                        ...responsiveStyles.th,
+                        padding: screenSize.isMobile ? '12px 16px' : '16px 20px',
+                        fontSize: screenSize.isMobile ? '12px' : '14px',
+                        fontWeight: '700',
+                        color: '#374151',
+                        textTransform: 'uppercase',
+                        letterSpacing: '0.5px'
+                      }}>⚡ Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {filteredApprovedBookings.map((booking, idx) => (
                       <tr key={idx} style={{ 
-                        borderBottom: '1px solid #f3f4f6', 
-                        backgroundColor: idx % 2 === 0 ? '#fff' : '#fafafa'
-                      }}>
-                        <td style={{ ...responsiveStyles.td, fontWeight: '500' }}>
+                        borderBottom: '1px solid #f1f5f9', 
+                        backgroundColor: idx % 2 === 0 ? '#fff' : '#f8fafc',
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = '#f0f9ff';
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = idx % 2 === 0 ? '#fff' : '#f8fafc';
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                      >
+                        <td style={{ 
+                          ...responsiveStyles.td, 
+                          padding: screenSize.isMobile ? '12px 16px' : '16px 20px',
+                          borderRight: '1px solid #f1f5f9'
+                        }}>
                           <div>
-                            <div style={{ fontWeight: '600', color: '#1e293b' }}>
+                            <div style={{ 
+                              fontWeight: '600', 
+                              color: '#1e293b',
+                              fontSize: screenSize.isMobile ? '13px' : '14px',
+                              marginBottom: '4px'
+                            }}>
                               {booking.customerName || booking.name || 'N/A'}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#64748b' }}>
-                              {booking.phoneNumber || 'N/A'}
+                            <div style={{ 
+                              fontSize: screenSize.isMobile ? '11px' : '12px', 
+                              color: '#64748b',
+                              fontWeight: '500'
+                            }}>
+                              📞 {booking.phoneNumber || 'N/A'}
                             </div>
                           </div>
                         </td>
-                        <td style={responsiveStyles.td}>
+                        <td style={{ 
+                          ...responsiveStyles.td,
+                          padding: '16px 20px',
+                          borderRight: '1px solid #f1f5f9'
+                        }}>
                           <div>
-                            <div style={{ fontWeight: '500', color: '#1e293b' }}>
+                            <div style={{ 
+                              fontWeight: '600', 
+                              color: '#1e293b',
+                              fontSize: screenSize.isMobile ? '13px' : '14px',
+                              marginBottom: '4px'
+                            }}>
                               {booking.vehicleNumber || 'N/A'}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'capitalize' }}>
-                              {booking.vehicleType || 'N/A'}
+                            <div style={{ 
+                              fontSize: screenSize.isMobile ? '11px' : '12px', 
+                              color: '#64748b', 
+                              textTransform: 'capitalize',
+                              fontWeight: '500'
+                            }}>
+                              🚗 {booking.vehicleType || 'N/A'}
                             </div>
                           </div>
                         </td>
-                        <td style={{ ...responsiveStyles.td, fontWeight: '600', color: '#059669' }}>
-                          {booking.slotId || booking.slot || 'N/A'}
+                        <td style={{ 
+                          ...responsiveStyles.td, 
+                          fontWeight: '700', 
+                          color: '#059669',
+                          padding: '16px 20px',
+                          borderRight: '1px solid #f1f5f9',
+                          fontSize: '16px'
+                        }}>
+                          🅿️ {booking.slotId || booking.slot || 'N/A'}
                         </td>
-                        <td style={{ ...responsiveStyles.td, fontWeight: '600', color: booking.isOvertime ? '#dc2626' : '#059669' }}>
+                        <td style={{ 
+                          ...responsiveStyles.td, 
+                          fontWeight: '600', 
+                          color: booking.isOvertime ? '#dc2626' : '#059669',
+                          padding: '16px 20px',
+                          borderRight: '1px solid #f1f5f9'
+                        }}>
                           <div>
-                            <div style={{ fontSize: '14px', fontWeight: '600' }}>
-                              {booking.activeTimeHours} hours
+                            <div style={{ 
+                              fontSize: screenSize.isMobile ? '13px' : '14px', 
+                              fontWeight: '700',
+                              marginBottom: '2px'
+                            }}>
+                              ⏱️ {booking.activeTimeHours} hours
                             </div>
                             {booking.isOvertime && (
-                              <div style={{ fontSize: '11px', color: '#dc2626' }}>
-                                +{booking.overtimeHours}h overtime
+                              <div style={{ 
+                                fontSize: '11px', 
+                                color: '#dc2626',
+                                fontWeight: '600',
+                                background: '#fef2f2',
+                                padding: '2px 6px',
+                                borderRadius: '4px',
+                                display: 'inline-block'
+                              }}>
+                                ⚠️ +{booking.overtimeHours}h overtime
                               </div>
                             )}
                           </div>
                         </td>
-                        <td style={{ ...responsiveStyles.td, fontWeight: '700', color: booking.isOvertime ? '#dc2626' : '#059669', fontSize: '16px' }}>
-                          Rs.{booking.calculatedAmount ? booking.calculatedAmount.toFixed(2) : '0.00'}
+                        <td style={{ 
+                          ...responsiveStyles.td, 
+                          fontWeight: '700', 
+                          color: booking.isOvertime ? '#dc2626' : '#059669', 
+                          fontSize: '18px',
+                          padding: '16px 20px',
+                          borderRight: '1px solid #f1f5f9'
+                        }}>
+                          💰 Rs.{booking.calculatedAmount ? booking.calculatedAmount.toFixed(2) : '0.00'}
                         </td>
-                        <td style={responsiveStyles.td}>
+                        <td style={{ 
+                          ...responsiveStyles.td,
+                          padding: '16px 20px'
+                        }}>
                           <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                             <button
                               onClick={() => handleViewFullRecord(booking)}
                               style={{
-                                padding: '6px 12px',
-                                backgroundColor: '#3b82f6',
+                                padding: '8px 12px',
+                                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                                 color: 'white',
                                 border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: '500',
+                                borderRadius: '8px',
+                                fontSize: screenSize.isMobile ? '11px' : '12px',
+                                fontWeight: '600',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '4px',
-                                transition: 'background-color 0.2s ease'
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
                               }}
-                              onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                              onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
+                              }}
                             >
                               <Eye size={14} />
-                              View Full
+                              View
                             </button>
                             <button
                               onClick={() => handleMakePayment(booking)}
                               style={{
-                                padding: '6px 12px',
-                                backgroundColor: '#059669',
+                                padding: '8px 12px',
+                                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                                 color: 'white',
                                 border: 'none',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                fontWeight: '500',
+                                borderRadius: '8px',
+                                fontSize: screenSize.isMobile ? '11px' : '12px',
+                                fontWeight: '600',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '4px',
-                                transition: 'background-color 0.2s ease'
+                                transition: 'all 0.3s ease',
+                                boxShadow: '0 2px 8px rgba(5, 150, 105, 0.3)'
                               }}
-                              onMouseEnter={(e) => e.target.style.backgroundColor = '#047857'}
-                              onMouseLeave={(e) => e.target.style.backgroundColor = '#059669'}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'translateY(-2px)';
+                                e.target.style.boxShadow = '0 4px 12px rgba(5, 150, 105, 0.4)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'translateY(0)';
+                                e.target.style.boxShadow = '0 2px 8px rgba(5, 150, 105, 0.3)';
+                              }}
                             >
-                              💳 Make Payment
+                              💳 Pay
                             </button>
                           </div>
                         </td>
@@ -998,143 +1324,378 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
         // Show completed payments in "Payment Successful" tab
         filteredCompletedPayments.length === 0 ? (
         <div style={{ 
-          color: '#6b7280', 
-          textAlign: 'center', 
+          background: 'white',
+          borderRadius: '16px',
           padding: screenSize.isMobile ? 40 : 60,
-          fontSize: screenSize.isMobile ? 14 : 16
+          textAlign: 'center',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+          border: '1px solid #e2e8f0'
         }}>
-          {completedPayments.length === 0 ? 'No completed payment records found.' : 'No completed payments match your search criteria.'}
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>✅</div>
+          <h3 style={{ 
+            color: '#374151', 
+            fontSize: screenSize.isMobile ? 18 : 24,
+            fontWeight: '600',
+            marginBottom: '8px'
+          }}>
+            {completedPayments.length === 0 ? 'No Payment Records' : 'No Matching Results'}
+          </h3>
+          <p style={{ 
+            color: '#6b7280', 
+            fontSize: screenSize.isMobile ? 14 : 16,
+            margin: 0
+          }}>
+            {completedPayments.length === 0 
+              ? 'Payment records will appear here once transactions are completed.' 
+              : 'Try adjusting your search criteria to find payment records.'
+            }
+          </p>
         </div>
       ) : (
-        <div style={responsiveStyles.tableContainer}>
+        <div style={{
+          ...responsiveStyles.tableContainer,
+          background: 'white',
+          borderRadius: '16px',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+          border: '1px solid #e2e8f0',
+          overflow: 'hidden'
+        }}>
           {screenSize.isMobile ? (
               // Mobile card view for payments
             <div style={{ padding: screenSize.isMobile ? 16 : 24 }}>
               {filteredCompletedPayments.map((payment, index) => renderMobileCard(payment, index))}
     </div>
     ) : (
-              // Desktop table view for payments
+              // Professional Desktop table view for payments
         <div style={{ overflowX: 'auto' }}>
-              <table style={responsiveStyles.table}>
+              <table style={{
+                ...responsiveStyles.table,
+                borderCollapse: 'separate',
+                borderSpacing: 0
+              }}>
             <thead>
-              <tr style={{ backgroundColor: '#f9fafb', borderBottom: '1px solid #e5e7eb' }}>
-                       <th style={responsiveStyles.th}>Payment ID</th>
-                       <th style={responsiveStyles.th}>Customer</th>
-                       <th style={responsiveStyles.th}>Vehicle</th>
-                       <th style={responsiveStyles.th}>Slot</th>
-                       <th style={responsiveStyles.th}>Duration</th>
-                       <th style={responsiveStyles.th}>Base Amount</th>
-                       <th style={responsiveStyles.th}>Overtime</th>
-                    <th style={responsiveStyles.th}>Total Amount</th>
-                    <th style={responsiveStyles.th}>Payment Method</th>
-                       <th style={responsiveStyles.th}>Payment Date</th>
-                       <th style={responsiveStyles.th}>Action</th>
+              <tr style={{ 
+                background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                borderBottom: '2px solid #bbf7d0'
+              }}>
+                       <th style={{
+                         ...responsiveStyles.th,
+                         padding: '16px 20px',
+                         fontSize: '14px',
+                         fontWeight: '700',
+                         color: '#166534',
+                         textTransform: 'uppercase',
+                         letterSpacing: '0.5px',
+                         borderRight: '1px solid #bbf7d0'
+                       }}>👤 Customer</th>
+                       <th style={{
+                         ...responsiveStyles.th,
+                         padding: '16px 20px',
+                         fontSize: '14px',
+                         fontWeight: '700',
+                         color: '#166534',
+                         textTransform: 'uppercase',
+                         letterSpacing: '0.5px',
+                         borderRight: '1px solid #bbf7d0'
+                       }}>🚗 Vehicle</th>
+                       <th style={{
+                         ...responsiveStyles.th,
+                         padding: '16px 20px',
+                         fontSize: '14px',
+                         fontWeight: '700',
+                         color: '#166534',
+                         textTransform: 'uppercase',
+                         letterSpacing: '0.5px',
+                         borderRight: '1px solid #bbf7d0'
+                       }}>🅿️ Slot</th>
+                       <th style={{
+                         ...responsiveStyles.th,
+                         padding: '16px 20px',
+                         fontSize: '14px',
+                         fontWeight: '700',
+                         color: '#166534',
+                         textTransform: 'uppercase',
+                         letterSpacing: '0.5px',
+                         borderRight: '1px solid #bbf7d0'
+                       }}>⏱️ Duration</th>
+                       <th style={{
+                         ...responsiveStyles.th,
+                         padding: '16px 20px',
+                         fontSize: '14px',
+                         fontWeight: '700',
+                         color: '#166534',
+                         textTransform: 'uppercase',
+                         letterSpacing: '0.5px',
+                         borderRight: '1px solid #bbf7d0'
+                       }}>💰 Base Amount</th>
+                       <th style={{
+                         ...responsiveStyles.th,
+                         padding: '16px 20px',
+                         fontSize: '14px',
+                         fontWeight: '700',
+                         color: '#166534',
+                         textTransform: 'uppercase',
+                         letterSpacing: '0.5px',
+                         borderRight: '1px solid #bbf7d0'
+                       }}>⚠️ Overtime</th>
+                    <th style={{
+                      ...responsiveStyles.th,
+                      padding: '16px 20px',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      color: '#166534',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      borderRight: '1px solid #bbf7d0'
+                    }}>💳 Total Amount</th>
+                    <th style={{
+                      ...responsiveStyles.th,
+                      padding: '16px 20px',
+                      fontSize: '14px',
+                      fontWeight: '700',
+                      color: '#166534',
+                      textTransform: 'uppercase',
+                      letterSpacing: '0.5px',
+                      borderRight: '1px solid #bbf7d0'
+                    }}>💳 Method</th>
+                       <th style={{
+                         ...responsiveStyles.th,
+                         padding: '16px 20px',
+                         fontSize: '14px',
+                         fontWeight: '700',
+                         color: '#166534',
+                         textTransform: 'uppercase',
+                         letterSpacing: '0.5px',
+                         borderRight: '1px solid #bbf7d0'
+                       }}>📅 Payment Date</th>
+                       <th style={{
+                         ...responsiveStyles.th,
+                         padding: '16px 20px',
+                         fontSize: '14px',
+                         fontWeight: '700',
+                         color: '#166534',
+                         textTransform: 'uppercase',
+                         letterSpacing: '0.5px'
+                       }}>⚡ Action</th>
               </tr>
             </thead>
             <tbody>
                   {filteredCompletedPayments.map((payment, idx) => (
                     <tr key={idx} style={{ 
-                      borderBottom: '1px solid #f3f4f6', 
-                        backgroundColor: idx % 2 === 0 ? '#fff' : '#fafafa'
-                      }}>
-                        <td style={{ ...responsiveStyles.td, fontWeight: '600', color: '#3b82f6', fontFamily: 'monospace' }}>
-                          {payment.id ? `#${payment.id.slice(-6)}` : 'N/A'}
-                        </td>
-                        <td style={{ ...responsiveStyles.td, fontWeight: '500' }}>
+                      borderBottom: '1px solid #f1f5f9', 
+                      backgroundColor: idx % 2 === 0 ? '#fff' : '#f8fafc',
+                      transition: 'all 0.2s ease'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.backgroundColor = '#f0fdf4';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.backgroundColor = idx % 2 === 0 ? '#fff' : '#f8fafc';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = 'none';
+                    }}
+                    >
+                        <td style={{ 
+                          ...responsiveStyles.td, 
+                          fontWeight: '500',
+                          padding: '16px 20px',
+                          borderRight: '1px solid #f1f5f9'
+                        }}>
                           <div>
-                            <div style={{ fontWeight: '600', color: '#1e293b' }}>
-                    {payment.driverName || payment.customerName || 'N/A'}
+                            <div style={{ 
+                              fontWeight: '600', 
+                              color: '#1e293b',
+                              fontSize: '14px'
+                            }}>
+                              👤 {payment.driverName || payment.customerName || 'N/A'}
                             </div>
                           </div>
                   </td>
-                      <td style={responsiveStyles.td}>
+                      <td style={{
+                        ...responsiveStyles.td,
+                        padding: '16px 20px',
+                        borderRight: '1px solid #f1f5f9'
+                      }}>
                           <div>
-                            <div style={{ fontWeight: '500', color: '#1e293b' }}>
+                            <div style={{ 
+                              fontWeight: '600', 
+                              color: '#1e293b',
+                              fontSize: screenSize.isMobile ? '13px' : '14px',
+                              marginBottom: '4px'
+                            }}>
                               {payment.vehicleNumber || 'N/A'}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#64748b', textTransform: 'capitalize' }}>
-                    {payment.vehicleType || 'N/A'}
+                            <div style={{ 
+                              fontSize: screenSize.isMobile ? '11px' : '12px', 
+                              color: '#64748b', 
+                              textTransform: 'capitalize',
+                              fontWeight: '500'
+                            }}>
+                              🚗 {payment.vehicleType || 'N/A'}
                             </div>
                           </div>
                   </td>
-                                                 <td style={{ ...responsiveStyles.td, fontWeight: '600', color: '#059669' }}>
-                    {payment.slotId || 'N/A'}
+                                                 <td style={{ 
+                                                   ...responsiveStyles.td, 
+                                                   fontWeight: '700', 
+                                                   color: '#059669',
+                                                   padding: '16px 20px',
+                                                   borderRight: '1px solid #f1f5f9',
+                                                   fontSize: '16px'
+                                                 }}>
+                    🅿️ {payment.slotId || 'N/A'}
                   </td>
-                  <td style={responsiveStyles.td}>
+                  <td style={{
+                    ...responsiveStyles.td,
+                    padding: '16px 20px',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>
                     <div>
-                      <div style={{ fontWeight: '500', color: '#1e293b' }}>
-                        {payment.requestedDuration ? `${payment.requestedDuration} hour${payment.requestedDuration > 1 ? 's' : ''}` : payment.duration ? `${payment.duration} hour${payment.duration > 1 ? 's' : ''}` : 'N/A'}
+                      <div style={{ 
+                        fontWeight: '600', 
+                        color: '#1e293b',
+                        fontSize: '14px',
+                        marginBottom: '2px'
+                      }}>
+                        ⏱️ {payment.requestedDuration ? `${payment.requestedDuration} hour${payment.requestedDuration > 1 ? 's' : ''}` : payment.duration ? `${payment.duration} hour${payment.duration > 1 ? 's' : ''}` : 'N/A'}
                       </div>
                       {payment.isOvertime && (
-                        <div style={{ fontSize: '11px', color: '#dc2626', fontWeight: '500' }}>
-                          +{payment.overtimeHours}h overtime
+                        <div style={{ 
+                          fontSize: '11px', 
+                          color: '#dc2626', 
+                          fontWeight: '600',
+                          background: '#fef2f2',
+                          padding: '2px 6px',
+                          borderRadius: '4px',
+                          display: 'inline-block'
+                        }}>
+                          ⚠️ +{payment.overtimeHours}h overtime
                         </div>
                       )}
                     </div>
                   </td>
-                  <td style={{ ...responsiveStyles.td, fontWeight: '600', color: '#059669', fontSize: '14px' }}>
-                    Rs.{payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00'}
+                  <td style={{ 
+                    ...responsiveStyles.td, 
+                    fontWeight: '700', 
+                    color: '#059669', 
+                    fontSize: '16px',
+                    padding: '16px 20px',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>
+                    💰 Rs.{payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00'}
                   </td>
-                  <td style={responsiveStyles.td}>
+                  <td style={{
+                    ...responsiveStyles.td,
+                    padding: '16px 20px',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>
                     {payment.isOvertime ? (
                       <div>
-                        <div style={{ fontSize: '12px', fontWeight: '600', color: '#dc2626' }}>
-                          Rs.{payment.overtimeAmount ? payment.overtimeAmount.toFixed(2) : '0.00'}
+                        <div style={{ 
+                          fontSize: '14px', 
+                          fontWeight: '700', 
+                          color: '#dc2626',
+                          marginBottom: '2px'
+                        }}>
+                          ⚠️ Rs.{payment.overtimeAmount ? payment.overtimeAmount.toFixed(2) : '0.00'}
                         </div>
-                        <div style={{ fontSize: '10px', color: '#dc2626' }}>
+                        <div style={{ 
+                          fontSize: '11px', 
+                          color: '#dc2626',
+                          fontWeight: '600'
+                        }}>
                           {payment.overtimeHours}h
                         </div>
                       </div>
                     ) : (
-                      <div style={{ fontSize: '12px', color: '#6b7280' }}>No overtime</div>
+                      <div style={{ 
+                                fontSize: screenSize.isMobile ? '11px' : '12px',
+                        color: '#6b7280',
+                        fontWeight: '500'
+                      }}>✅ No overtime</div>
                     )}
                   </td>
-                         <td style={{ ...responsiveStyles.td, fontWeight: '700', color: payment.isOvertime ? '#dc2626' : '#059669', fontSize: '16px' }}>
-                           Rs.{payment.totalAmount ? payment.totalAmount.toFixed(2) : payment.amount ? payment.amount.toFixed(2) : '0.00'}
+                         <td style={{ 
+                           ...responsiveStyles.td, 
+                           fontWeight: '700', 
+                           color: payment.isOvertime ? '#dc2626' : '#059669', 
+                           fontSize: '18px',
+                           padding: '16px 20px',
+                           borderRight: '1px solid #f1f5f9'
+                         }}>
+                           💳 Rs.{payment.totalAmount ? payment.totalAmount.toFixed(2) : payment.amount ? payment.amount.toFixed(2) : '0.00'}
                   </td>
-                      <td style={responsiveStyles.td}>
+                      <td style={{
+                        ...responsiveStyles.td,
+                        padding: '16px 20px',
+                        borderRight: '1px solid #f1f5f9'
+                      }}>
                            <span style={{
-                             padding: '4px 8px',
-                             borderRadius: '6px',
-                             fontSize: '12px',
-                             fontWeight: '500',
+                             padding: '6px 12px',
+                             borderRadius: '8px',
+                                fontSize: screenSize.isMobile ? '11px' : '12px',
+                             fontWeight: '600',
                              backgroundColor: payment.paymentMethod === 'Cash' ? '#fef3c7' : 
                                             payment.paymentMethod === 'Credit Card' ? '#dbeafe' : 
                                             payment.paymentMethod === 'Digital Wallet' ? '#f3e8ff' : '#f3f4f6',
                              color: payment.paymentMethod === 'Cash' ? '#92400e' : 
                                     payment.paymentMethod === 'Credit Card' ? '#1e40af' : 
-                                    payment.paymentMethod === 'Digital Wallet' ? '#7c3aed' : '#374151'
+                                    payment.paymentMethod === 'Digital Wallet' ? '#7c3aed' : '#374151',
+                             border: '1px solid',
+                             borderColor: payment.paymentMethod === 'Cash' ? '#f59e0b' : 
+                                        payment.paymentMethod === 'Credit Card' ? '#3b82f6' : 
+                                        payment.paymentMethod === 'Digital Wallet' ? '#8b5cf6' : '#d1d5db'
                            }}>
-                             {payment.paymentMethod || 'N/A'}
+                             💳 {payment.paymentMethod || 'N/A'}
                            </span>
                   </td>
-                      <td style={responsiveStyles.td}>
-                           <div style={{ fontSize: '13px', fontWeight: '500' }}>
-                             {payment.date ? new Date(payment.date).toLocaleDateString() : 'N/A'}
+                      <td style={{
+                        ...responsiveStyles.td,
+                        padding: '16px 20px',
+                        borderRight: '1px solid #f1f5f9'
+                      }}>
+                           <div style={{ 
+                             fontSize: '13px', 
+                             fontWeight: '600',
+                             color: '#1e293b'
+                           }}>
+                             📅 {payment.date ? new Date(payment.date).toLocaleDateString() : 'N/A'}
                            </div>
                   </td>
-                      <td style={responsiveStyles.td}>
+                      <td style={{
+                        ...responsiveStyles.td,
+                        padding: '16px 20px'
+                      }}>
                            <button
                              onClick={() => handleViewFullRecord(payment)}
                              style={{
-                               padding: '6px 12px',
-                               backgroundColor: '#3b82f6',
+                               padding: '8px 12px',
+                               background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                                color: 'white',
                                border: 'none',
-                               borderRadius: '6px',
-                               fontSize: '12px',
-                               fontWeight: '500',
+                               borderRadius: '8px',
+                               fontSize: screenSize.isMobile ? '11px' : '12px',
+                               fontWeight: '600',
                                cursor: 'pointer',
                                display: 'flex',
                                alignItems: 'center',
                                gap: '4px',
-                               transition: 'background-color 0.2s ease'
+                               transition: 'all 0.3s ease',
+                               boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
                              }}
-                             onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                             onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
+                             onMouseEnter={(e) => {
+                               e.target.style.transform = 'translateY(-2px)';
+                               e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                             }}
+                             onMouseLeave={(e) => {
+                               e.target.style.transform = 'translateY(0)';
+                               e.target.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
+                             }}
                            >
                              <Eye size={14} />
-                             View Full
+                             View
                            </button>
                   </td>
                 </tr>
@@ -1147,98 +1708,149 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
          )
        )}
 
-       {/* Payment Details Modal */}
-       {console.log('Modal state:', { showPaymentModal, selectedPayment })}
+       {/* Professional Payment Details Modal */}
        {showPaymentModal && selectedPayment && (
-                    <div style={responsiveStyles.modal}
+                    <div style={{
+                      ...responsiveStyles.modal,
+                      background: 'rgba(0, 0, 0, 0.6)',
+                      backdropFilter: 'blur(8px)'
+                    }}
            onClick={() => {
-             console.log('X button clicked');
              setShowPaymentModal(false);
              setSelectedPayment(null);
            }}
            >
-           <div style={responsiveStyles.modalContent}
+           <div style={{
+             ...responsiveStyles.modalContent,
+             background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+             borderRadius: screenSize.isMobile ? '16px' : '20px',
+             boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+             border: '1px solid rgba(255, 255, 255, 0.2)',
+             maxWidth: screenSize.isMobile ? '95vw' : screenSize.isSmallTablet ? '90vw' : '900px',
+             maxHeight: '95vh',
+             overflow: 'visible'
+           }}
            onClick={(e) => e.stopPropagation()}
            >
-             {/* Modal Header */}
+             {/* Professional Modal Header */}
              <div style={{
                display: 'flex',
                justifyContent: 'space-between',
                alignItems: 'center',
-               marginBottom: '24px',
-               paddingBottom: '16px',
-               borderBottom: '1px solid #e5e7eb'
+               marginBottom: screenSize.isMobile ? '20px' : '32px',
+               paddingBottom: screenSize.isMobile ? '16px' : '20px',
+               borderBottom: '2px solid #e2e8f0',
+               background: 'linear-gradient(135deg, #1e293b 0%, #334155 100%)',
+               margin: screenSize.isMobile ? '-16px -16px 16px -16px' : '-24px -24px 24px -24px',
+               padding: screenSize.isMobile ? '16px' : '24px',
+               borderRadius: screenSize.isMobile ? '16px 16px 0 0' : '20px 20px 0 0'
              }}>
                <div>
                  <h2 style={{
-                   fontSize: '24px',
+                   fontSize: screenSize.isMobile ? '20px' : screenSize.isSmallTablet ? '24px' : '28px',
                    fontWeight: '700',
-                   color: '#1e293b',
-                   margin: 0
+                   color: 'white',
+                   margin: 0,
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: screenSize.isMobile ? '8px' : '12px'
                  }}>
-                   {selectedPayment.id ? 'Payment Details' : 'Reservation Details'}
+                   {selectedPayment.id ? '💳 Payment Details' : '📋 Reservation Details'}
                  </h2>
                  <div style={{
-                   fontSize: '12px',
-                   color: '#6b7280',
-                   marginTop: '4px'
+                   fontSize: screenSize.isMobile ? '12px' : '14px',
+                   color: 'rgba(255, 255, 255, 0.8)',
+                   marginTop: '8px',
+                   fontWeight: '500'
                  }}>
-                   Modal State: {showPaymentModal ? 'OPEN' : 'CLOSED'} | Selected: {selectedPayment ? 'YES' : 'NO'}
+                   {selectedPayment.id ? 'Completed Payment Record' : 'Pending Payment Request'}
                  </div>
                </div>
                <button
                  onClick={() => {
-                   console.log('X button clicked');
                    setShowPaymentModal(false);
                    setSelectedPayment(null);
                  }}
                  style={{
-                   backgroundColor: 'transparent',
-                   border: 'none',
+                   backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                   border: '1px solid rgba(255, 255, 255, 0.2)',
                    cursor: 'pointer',
-                   padding: '8px',
-                   borderRadius: '6px',
+                   padding: screenSize.isMobile ? '8px' : '12px',
+                   borderRadius: screenSize.isMobile ? '8px' : '12px',
                    display: 'flex',
                    alignItems: 'center',
-                   justifyContent: 'center'
+                   justifyContent: 'center',
+                   transition: 'all 0.3s ease'
                  }}
-                 onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-                 onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+                 onMouseEnter={(e) => {
+                   e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                   e.target.style.transform = 'scale(1.05)';
+                 }}
+                 onMouseLeave={(e) => {
+                   e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                   e.target.style.transform = 'scale(1)';
+                 }}
                >
-                 <X size={20} color="#6b7280" />
+                 <X size={screenSize.isMobile ? 20 : 24} color="white" />
                </button>
              </div>
 
-             {/* Details - Compact Layout */}
+             {/* Professional Details Layout */}
              <div style={{ 
                flex: 1, 
                display: 'grid', 
                gridTemplateColumns: '1fr 1fr', 
-               gap: '16px',
-               overflow: 'hidden'
+               gap: '24px',
+               overflow: 'visible',
+               padding: '0 8px'
              }}>
                {/* Left Column */}
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                  {/* Customer Info */}
                  <div style={{
-                   backgroundColor: '#f8fafc',
-                   padding: '12px',
-                   borderRadius: '8px',
-                   border: '1px solid #e2e8f0'
+                   background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                   padding: '20px',
+                   borderRadius: '16px',
+                   border: '2px solid #0ea5e9',
+                   boxShadow: '0 4px 12px rgba(14, 165, 233, 0.1)'
                  }}>
-                   <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: '0 0 8px 0' }}>
-                     Customer Information
+                   <h4 style={{ 
+                     fontSize: '16px', 
+                     fontWeight: '700', 
+                     color: '#0c4a6e', 
+                     margin: '0 0 16px 0',
+                     display: 'flex',
+                     alignItems: 'center',
+                     gap: '8px'
+                   }}>
+                     👤 Customer Information
                    </h4>
-                   <div style={{ display: 'grid', gap: '6px' }}>
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Name: </span>
-                       <span style={{ fontSize: '13px', fontWeight: '600', color: '#1e293b' }}>
+                   <div style={{ display: 'grid', gap: '12px' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(14, 165, 233, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#0369a1', fontWeight: '600' }}>Name:</span>
+                       <span style={{ fontSize: '14px', fontWeight: '700', color: '#0c4a6e' }}>
                          {selectedPayment.driverName || selectedPayment.customerName || selectedPayment.name || 'N/A'}
                        </span>
                      </div>
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Phone: </span>
-                       <span style={{ fontSize: '13px', fontWeight: '500', color: '#1e293b' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(14, 165, 233, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#0369a1', fontWeight: '600' }}>Phone:</span>
+                       <span style={{ fontSize: '14px', fontWeight: '600', color: '#0c4a6e' }}>
                          {selectedPayment.phoneNumber || 'N/A'}
                        </span>
                      </div>
@@ -1247,30 +1859,63 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
 
                  {/* Vehicle Info */}
                  <div style={{
-                   backgroundColor: '#f0f9ff',
-                   padding: '12px',
-                   borderRadius: '8px',
-                   border: '1px solid #bae6fd'
+                   background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                   padding: '20px',
+                   borderRadius: '16px',
+                   border: '2px solid #22c55e',
+                   boxShadow: '0 4px 12px rgba(34, 197, 94, 0.1)'
                  }}>
-                   <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: '0 0 8px 0' }}>
-                     Vehicle Information
+                   <h4 style={{ 
+                     fontSize: '16px', 
+                     fontWeight: '700', 
+                     color: '#166534', 
+                     margin: '0 0 16px 0',
+                     display: 'flex',
+                     alignItems: 'center',
+                     gap: '8px'
+                   }}>
+                     🚗 Vehicle Information
                    </h4>
-                   <div style={{ display: 'grid', gap: '6px' }}>
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Number: </span>
-                       <span style={{ fontSize: '13px', fontWeight: '500', color: '#1e293b' }}>
+                   <div style={{ display: 'grid', gap: '12px' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(34, 197, 94, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Number:</span>
+                       <span style={{ fontSize: '14px', fontWeight: '700', color: '#166534' }}>
                          {selectedPayment.vehicleNumber || 'N/A'}
                        </span>
                      </div>
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Type: </span>
-                       <span style={{ fontSize: '13px', fontWeight: '500', color: '#1e293b', textTransform: 'capitalize' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(34, 197, 94, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Type:</span>
+                       <span style={{ fontSize: '14px', fontWeight: '600', color: '#166534', textTransform: 'capitalize' }}>
                          {selectedPayment.vehicleType || 'N/A'}
                        </span>
                      </div>
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Slot: </span>
-                       <span style={{ fontSize: '13px', fontWeight: '600', color: '#059669' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(34, 197, 94, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Slot:</span>
+                       <span style={{ fontSize: '14px', fontWeight: '700', color: '#166534' }}>
                          {selectedPayment.slotId || selectedPayment.slot || 'N/A'}
                        </span>
                      </div>
@@ -1279,26 +1924,51 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
 
                  {/* Time Info */}
                  <div style={{
-                   backgroundColor: '#fefce8',
-                   padding: '12px',
-                   borderRadius: '8px',
-                   border: '1px solid #fde047'
+                   background: 'linear-gradient(135deg, #fefce8 0%, #fef3c7 100%)',
+                   padding: '20px',
+                   borderRadius: '16px',
+                   border: '2px solid #f59e0b',
+                   boxShadow: '0 4px 12px rgba(245, 158, 11, 0.1)'
                  }}>
-                   <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: '0 0 8px 0' }}>
-                     Time Information
+                   <h4 style={{ 
+                     fontSize: '16px', 
+                     fontWeight: '700', 
+                     color: '#92400e', 
+                     margin: '0 0 16px 0',
+                     display: 'flex',
+                     alignItems: 'center',
+                     gap: '8px'
+                   }}>
+                     ⏰ Time Information
                    </h4>
-                   <div style={{ display: 'grid', gap: '6px' }}>
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Check-In: </span>
-                       <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
+                   <div style={{ display: 'grid', gap: '12px' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(245, 158, 11, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#b45309', fontWeight: '600' }}>Check-In:</span>
+                       <span style={{ fontSize: '13px', fontWeight: '600', color: '#92400e' }}>
                          {selectedPayment.checkInTime ? new Date(selectedPayment.checkInTime).toLocaleString() : 'N/A'}
                        </span>
                      </div>
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(245, 158, 11, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#b45309', fontWeight: '600' }}>
                          {selectedPayment.id ? 'Check-Out:' : 'Check-Out (Current):'}
                        </span>
-                       <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
+                       <span style={{ fontSize: '13px', fontWeight: '600', color: '#92400e' }}>
                          {selectedPayment.checkOutTime 
                            ? new Date(selectedPayment.checkOutTime).toLocaleString()
                            : selectedPayment.currentCheckOutTime 
@@ -1307,9 +1977,17 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                          }
                        </span>
                      </div>
-                                            <div>
-                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Requested Duration: </span>
-                        <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(245, 158, 11, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#b45309', fontWeight: '600' }}>Requested Duration:</span>
+                       <span style={{ fontSize: '13px', fontWeight: '600', color: '#92400e' }}>
                           {selectedPayment.requestedDuration ? `${selectedPayment.requestedDuration} hour${selectedPayment.requestedDuration > 1 ? 's' : ''}` : selectedPayment.duration ? `${selectedPayment.duration} hour${selectedPayment.duration > 1 ? 's' : ''}` : 'N/A'}
                         </span>
                       </div>
@@ -1318,53 +1996,108 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                </div>
 
                {/* Right Column */}
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                  {/* Payment/Reservation Info */}
                  <div style={{
-                   backgroundColor: selectedPayment.id ? '#f0fdf4' : '#fef2f2',
-                   padding: '12px',
-                   borderRadius: '8px',
-                   border: selectedPayment.id ? '1px solid #bbf7d0' : '1px solid #fecaca'
+                   background: selectedPayment.id 
+                     ? 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' 
+                     : 'linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)',
+                   padding: '20px',
+                   borderRadius: '16px',
+                   border: selectedPayment.id ? '2px solid #22c55e' : '2px solid #ef4444',
+                   boxShadow: selectedPayment.id 
+                     ? '0 4px 12px rgba(34, 197, 94, 0.1)' 
+                     : '0 4px 12px rgba(239, 68, 68, 0.1)'
                  }}>
-                   <h4 style={{ fontSize: '14px', fontWeight: '600', color: '#1e293b', margin: '0 0 8px 0' }}>
-                     {selectedPayment.id ? 'Payment Information' : 'Reservation Information'}
+                   <h4 style={{ 
+                     fontSize: '16px', 
+                     fontWeight: '700', 
+                     color: selectedPayment.id ? '#166534' : '#dc2626', 
+                     margin: '0 0 16px 0',
+                     display: 'flex',
+                     alignItems: 'center',
+                     gap: '8px'
+                   }}>
+                     {selectedPayment.id ? '💳 Payment Information' : '📋 Reservation Information'}
                    </h4>
-                   <div style={{ display: 'grid', gap: '6px' }}>
+                   <div style={{ display: 'grid', gap: '12px' }}>
                      {selectedPayment.id && (
-                       <div>
-                         <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Payment ID: </span>
-                         <span style={{ fontSize: '12px', fontWeight: '600', color: '#3b82f6', fontFamily: 'monospace' }}>
+                       <div style={{
+                         display: 'flex',
+                         justifyContent: 'space-between',
+                         alignItems: 'center',
+                         padding: '8px 12px',
+                         background: 'rgba(255, 255, 255, 0.7)',
+                         borderRadius: '8px',
+                         border: '1px solid rgba(34, 197, 94, 0.2)'
+                       }}>
+                         <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Payment ID:</span>
+                         <span style={{ fontSize: '13px', fontWeight: '700', color: '#3b82f6', fontFamily: 'monospace' }}>
                            {selectedPayment.id || 'N/A'}
                          </span>
                        </div>
                      )}
-                                           <div>
-                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Base Amount: </span>
-                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#059669' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(34, 197, 94, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Base Amount:</span>
+                       <span style={{ fontSize: '16px', fontWeight: '700', color: '#166534' }}>
                           Rs.{selectedPayment.baseAmount ? selectedPayment.baseAmount.toFixed(2) : '0.00'}
                         </span>
                       </div>
                       {selectedPayment.isOvertime && (
-                        <div>
-                          <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Overtime Amount: </span>
-                          <span style={{ fontSize: '14px', fontWeight: '600', color: '#dc2626' }}>
+                       <div style={{
+                         display: 'flex',
+                         justifyContent: 'space-between',
+                         alignItems: 'center',
+                         padding: '8px 12px',
+                         background: 'rgba(255, 255, 255, 0.7)',
+                         borderRadius: '8px',
+                         border: '1px solid rgba(239, 68, 68, 0.2)'
+                       }}>
+                         <span style={{ fontSize: '12px', color: '#dc2626', fontWeight: '600' }}>Overtime Amount:</span>
+                         <span style={{ fontSize: '16px', fontWeight: '700', color: '#dc2626' }}>
                             Rs.{selectedPayment.overtimeAmount ? selectedPayment.overtimeAmount.toFixed(2) : '0.00'}
                           </span>
                         </div>
                       )}
-                      <div>
-                        <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Total Amount: </span>
-                        <span style={{ fontSize: '16px', fontWeight: '700', color: selectedPayment.isOvertime ? '#dc2626' : '#059669' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '12px 16px',
+                       background: 'rgba(255, 255, 255, 0.9)',
+                       borderRadius: '12px',
+                       border: '2px solid',
+                       borderColor: selectedPayment.isOvertime ? '#ef4444' : '#22c55e',
+                       boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                     }}>
+                       <span style={{ fontSize: '14px', color: selectedPayment.isOvertime ? '#dc2626' : '#166534', fontWeight: '700' }}>Total Amount:</span>
+                       <span style={{ fontSize: '20px', fontWeight: '800', color: selectedPayment.isOvertime ? '#dc2626' : '#166534' }}>
                           Rs.{selectedPayment.totalAmount ? selectedPayment.totalAmount.toFixed(2) : selectedPayment.amount ? selectedPayment.amount.toFixed(2) : selectedPayment.calculatedAmount ? selectedPayment.calculatedAmount.toFixed(2) : '0.00'}
                         </span>
                       </div>
                      {selectedPayment.id && (
-                       <div>
-                         <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Method: </span>
+                       <div style={{
+                         display: 'flex',
+                         justifyContent: 'space-between',
+                         alignItems: 'center',
+                         padding: '8px 12px',
+                         background: 'rgba(255, 255, 255, 0.7)',
+                         borderRadius: '8px',
+                         border: '1px solid rgba(34, 197, 94, 0.2)'
+                       }}>
+                         <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Method:</span>
                          <span style={{
-                           padding: '2px 6px',
-                           borderRadius: '4px',
-                           fontSize: '11px',
+                           padding: '4px 8px',
+                           borderRadius: '6px',
+                                fontSize: screenSize.isMobile ? '11px' : '12px',
                            fontWeight: '600',
                            backgroundColor: selectedPayment.paymentMethod === 'Cash' ? '#fef3c7' : 
                                           selectedPayment.paymentMethod === 'Credit Card' ? '#dbeafe' : 
@@ -1378,18 +2111,34 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                        </div>
                      )}
                      {selectedPayment.isOvertime && (
-                       <div>
-                         <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Overtime: </span>
-                         <span style={{ fontSize: '12px', fontWeight: '600', color: '#dc2626' }}>
+                       <div style={{
+                         display: 'flex',
+                         justifyContent: 'space-between',
+                         alignItems: 'center',
+                         padding: '8px 12px',
+                         background: 'rgba(255, 255, 255, 0.7)',
+                         borderRadius: '8px',
+                         border: '1px solid rgba(239, 68, 68, 0.2)'
+                       }}>
+                         <span style={{ fontSize: '12px', color: '#dc2626', fontWeight: '600' }}>Overtime:</span>
+                         <span style={{ fontSize: '13px', fontWeight: '700', color: '#dc2626' }}>
                            {selectedPayment.overtimeHours} hours
                          </span>
                        </div>
                      )}
-                     <div>
-                       <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>
+                     <div style={{
+                       display: 'flex',
+                       justifyContent: 'space-between',
+                       alignItems: 'center',
+                       padding: '8px 12px',
+                       background: 'rgba(255, 255, 255, 0.7)',
+                       borderRadius: '8px',
+                       border: '1px solid rgba(34, 197, 94, 0.2)'
+                     }}>
+                       <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>
                          {selectedPayment.id ? 'Payment Date:' : 'Active Time:'}
                        </span>
-                       <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
+                       <span style={{ fontSize: '13px', fontWeight: '600', color: '#166534' }}>
                          {selectedPayment.id 
                            ? (selectedPayment.date ? new Date(selectedPayment.date).toLocaleDateString() : 'N/A')
                            : `${selectedPayment.activeTimeHours} hours`
@@ -1397,17 +2146,33 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                        </span>
                      </div>
                                            {selectedPayment.bookingId && (
-                        <div>
-                          <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Booking ID: </span>
-                          <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
+                       <div style={{
+                         display: 'flex',
+                         justifyContent: 'space-between',
+                         alignItems: 'center',
+                         padding: '8px 12px',
+                         background: 'rgba(255, 255, 255, 0.7)',
+                         borderRadius: '8px',
+                         border: '1px solid rgba(34, 197, 94, 0.2)'
+                       }}>
+                         <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Booking ID:</span>
+                         <span style={{ fontSize: '13px', fontWeight: '600', color: '#166534' }}>
                             {selectedPayment.bookingId}
                           </span>
                         </div>
                       )}
                       {selectedPayment.parkId && (
-                        <div>
-                          <span style={{ fontSize: '11px', color: '#64748b', fontWeight: '500' }}>Park ID: </span>
-                          <span style={{ fontSize: '12px', fontWeight: '500', color: '#1e293b' }}>
+                       <div style={{
+                         display: 'flex',
+                         justifyContent: 'space-between',
+                         alignItems: 'center',
+                         padding: '8px 12px',
+                         background: 'rgba(255, 255, 255, 0.7)',
+                         borderRadius: '8px',
+                         border: '1px solid rgba(34, 197, 94, 0.2)'
+                       }}>
+                         <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Park ID:</span>
+                         <span style={{ fontSize: '13px', fontWeight: '600', color: '#166534' }}>
                             {selectedPayment.parkId}
                           </span>
                         </div>
@@ -1434,122 +2199,181 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                </div>
              </div>
 
-             {/* Modal Footer */}
+             {/* Professional Modal Footer */}
              <div style={{
-               marginTop: '16px',
-               paddingTop: '12px',
-               borderTop: '1px solid #e5e7eb',
+               marginTop: '24px',
+               paddingTop: '20px',
+               borderTop: '2px solid #e2e8f0',
                display: 'flex',
-               justifyContent: 'flex-end'
+               justifyContent: 'flex-end',
+               background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+               margin: '24px -24px -24px -24px',
+               padding: '20px 24px',
+               borderRadius: '0 0 20px 20px'
              }}>
                <button
                  onClick={() => {
-                   console.log('X button clicked');
                    setShowPaymentModal(false);
                    setSelectedPayment(null);
                  }}
                  style={{
-                   padding: '10px 20px',
-                   backgroundColor: '#dc2626',
+                   padding: '12px 24px',
+                   background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
                    color: 'white',
                    border: 'none',
-                   borderRadius: '6px',
+                   borderRadius: '12px',
                    fontSize: '14px',
                    fontWeight: '600',
                    cursor: 'pointer',
-                   transition: 'background-color 0.2s ease',
-                   minWidth: '80px'
+                   transition: 'all 0.3s ease',
+                   minWidth: '100px',
+                   boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: '8px'
                  }}
-                 onMouseEnter={(e) => e.target.style.backgroundColor = '#b91c1c'}
-                 onMouseLeave={(e) => e.target.style.backgroundColor = '#dc2626'}
+                 onMouseEnter={(e) => {
+                   e.target.style.transform = 'translateY(-2px)';
+                   e.target.style.boxShadow = '0 6px 16px rgba(220, 38, 38, 0.4)';
+                 }}
+                 onMouseLeave={(e) => {
+                   e.target.style.transform = 'translateY(0)';
+                   e.target.style.boxShadow = '0 4px 12px rgba(220, 38, 38, 0.3)';
+                 }}
                >
-                 Close
+                 ✕ Close
                </button>
              </div>
            </div>
       </div>
     )}
 
-    {/* Bill Modal for Payment */}
+    {/* Professional Bill Modal for Payment */}
     {showBillModal && selectedReservation && (
-      <div style={responsiveStyles.modal}
+      <div style={{
+        ...responsiveStyles.modal,
+        background: 'rgba(0, 0, 0, 0.6)',
+        backdropFilter: 'blur(8px)'
+      }}
       onClick={() => {
-        console.log('X button clicked');
         setShowBillModal(false);
         setSelectedReservation(null);
       }}
       >
         <div style={{
           ...responsiveStyles.modalContent,
-          maxWidth: screenSize.isMobile ? '95vw' : '600px',
-          maxHeight: screenSize.isMobile ? '90vh' : '80vh'
+          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+          borderRadius: '20px',
+          boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          maxWidth: screenSize.isMobile ? '95vw' : '700px',
+          maxHeight: screenSize.isMobile ? '90vh' : '85vh'
         }}
         onClick={(e) => e.stopPropagation()}
         >
-          {/* Modal Header */}
+          {/* Professional Modal Header */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '20px',
-            paddingBottom: '16px',
-            borderBottom: '1px solid #e5e7eb'
+            marginBottom: '24px',
+            paddingBottom: '20px',
+            borderBottom: '2px solid #e2e8f0',
+            background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+            margin: '-24px -24px 24px -24px',
+            padding: '24px',
+            borderRadius: '20px 20px 0 0'
           }}>
             <h2 style={{
               margin: 0,
-              fontSize: '24px',
+              fontSize: '28px',
               fontWeight: '700',
-              color: '#1f2937'
+              color: 'white',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px'
             }}>
               💳 Payment Bill
             </h2>
             <button
               onClick={() => {
-                console.log('X button clicked');
                 setShowBillModal(false);
                 setSelectedReservation(null);
               }}
               style={{
-                backgroundColor: 'transparent',
-                border: 'none',
+                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
                 cursor: 'pointer',
-                padding: '8px',
-                borderRadius: '6px',
+                padding: '12px',
+                borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'center',
+                transition: 'all 0.3s ease'
               }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+              onMouseEnter={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.2)';
+                e.target.style.transform = 'scale(1.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.backgroundColor = 'rgba(255, 255, 255, 0.1)';
+                e.target.style.transform = 'scale(1)';
+              }}
             >
-              <X size={20} color="#6b7280" />
+              <X size={24} color="white" />
             </button>
           </div>
 
-          {/* Bill Content */}
+          {/* Professional Bill Content */}
           <div style={{
             flex: 1,
             overflow: 'auto',
-            padding: '16px',
-            backgroundColor: '#f9fafb',
-            borderRadius: '8px',
-            marginBottom: '20px'
+            padding: '20px',
+            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+            borderRadius: '16px',
+            marginBottom: '24px',
+            border: '1px solid #e2e8f0'
           }}>
             {/* Customer Info */}
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600', color: '#374151' }}>
-                Customer Information
+            <div style={{ 
+              marginBottom: '24px',
+              background: 'white',
+              padding: '20px',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{ 
+                margin: '0 0 16px 0', 
+                fontSize: '20px', 
+                fontWeight: '700', 
+                color: '#1e293b',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                👤 Customer Information
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <span style={{ fontWeight: '500', color: '#6b7280' }}>Name:</span>
-                  <span style={{ marginLeft: '8px', fontWeight: '600' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{
+                  padding: '12px 16px',
+                  background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                  borderRadius: '8px',
+                  border: '1px solid #0ea5e9'
+                }}>
+                  <span style={{ fontWeight: '600', color: '#0369a1', fontSize: '14px' }}>Name:</span>
+                  <span style={{ marginLeft: '8px', fontWeight: '700', color: '#0c4a6e', fontSize: '16px' }}>
                     {selectedReservation.customerName || 'N/A'}
                   </span>
                 </div>
-                <div>
-                  <span style={{ fontWeight: '500', color: '#6b7280' }}>Phone:</span>
-                  <span style={{ marginLeft: '8px', fontWeight: '600' }}>
+                <div style={{
+                  padding: '12px 16px',
+                  background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+                  borderRadius: '8px',
+                  border: '1px solid #0ea5e9'
+                }}>
+                  <span style={{ fontWeight: '600', color: '#0369a1', fontSize: '14px' }}>Phone:</span>
+                  <span style={{ marginLeft: '8px', fontWeight: '700', color: '#0c4a6e', fontSize: '16px' }}>
                     {selectedReservation.phone || 'N/A'}
                   </span>
                 </div>
@@ -1557,20 +2381,45 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
             </div>
 
             {/* Vehicle Info */}
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600', color: '#374151' }}>
-                Vehicle Information
+            <div style={{ 
+              marginBottom: '24px',
+              background: 'white',
+              padding: '20px',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{ 
+                margin: '0 0 16px 0', 
+                fontSize: '20px', 
+                fontWeight: '700', 
+                color: '#1e293b',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                🚗 Vehicle Information
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <span style={{ fontWeight: '500', color: '#6b7280' }}>Number:</span>
-                  <span style={{ marginLeft: '8px', fontWeight: '600' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{
+                  padding: '12px 16px',
+                  background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                  borderRadius: '8px',
+                  border: '1px solid #22c55e'
+                }}>
+                  <span style={{ fontWeight: '600', color: '#15803d', fontSize: '14px' }}>Number:</span>
+                  <span style={{ marginLeft: '8px', fontWeight: '700', color: '#166534', fontSize: '16px' }}>
                     {selectedReservation.vehicleNumber || 'N/A'}
                   </span>
                 </div>
-                <div>
-                  <span style={{ fontWeight: '500', color: '#6b7280' }}>Type:</span>
-                  <span style={{ marginLeft: '8px', fontWeight: '600' }}>
+                <div style={{
+                  padding: '12px 16px',
+                  background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                  borderRadius: '8px',
+                  border: '1px solid #22c55e'
+                }}>
+                  <span style={{ fontWeight: '600', color: '#15803d', fontSize: '14px' }}>Type:</span>
+                  <span style={{ marginLeft: '8px', fontWeight: '700', color: '#166534', fontSize: '16px' }}>
                     {selectedReservation.vehicleType || 'N/A'}
                   </span>
                 </div>
@@ -1578,46 +2427,100 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
             </div>
 
             {/* Parking Info */}
-            <div style={{ marginBottom: '20px' }}>
-              <h3 style={{ margin: '0 0 12px 0', fontSize: '18px', fontWeight: '600', color: '#374151' }}>
-                Parking Information
+            <div style={{ 
+              marginBottom: '24px',
+              background: 'white',
+              padding: '20px',
+              borderRadius: '12px',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{ 
+                margin: '0 0 16px 0', 
+                fontSize: '20px', 
+                fontWeight: '700', 
+                color: '#1e293b',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                🅿️ Parking Information
               </h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                <div>
-                  <span style={{ fontWeight: '500', color: '#6b7280' }}>Slot:</span>
-                  <span style={{ marginLeft: '8px', fontWeight: '600' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                <div style={{
+                  padding: '12px 16px',
+                  background: 'linear-gradient(135deg, #fefce8 0%, #fef3c7 100%)',
+                  borderRadius: '8px',
+                  border: '1px solid #f59e0b'
+                }}>
+                  <span style={{ fontWeight: '600', color: '#b45309', fontSize: '14px' }}>Slot:</span>
+                  <span style={{ marginLeft: '8px', fontWeight: '700', color: '#92400e', fontSize: '16px' }}>
                     {selectedReservation.slotId || 'N/A'}
                   </span>
                 </div>
-                <div>
-                  <span style={{ fontWeight: '500', color: '#6b7280' }}>Active Time:</span>
-                  <span style={{ marginLeft: '8px', fontWeight: '600' }}>
+                <div style={{
+                  padding: '12px 16px',
+                  background: 'linear-gradient(135deg, #fefce8 0%, #fef3c7 100%)',
+                  borderRadius: '8px',
+                  border: '1px solid #f59e0b'
+                }}>
+                  <span style={{ fontWeight: '600', color: '#b45309', fontSize: '14px' }}>Active Time:</span>
+                  <span style={{ marginLeft: '8px', fontWeight: '700', color: '#92400e', fontSize: '16px' }}>
                     {selectedReservation.activeTimeHours ? `${selectedReservation.activeTimeHours.toFixed(1)} hours` : 'N/A'}
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Payment Summary */}
+            {/* Professional Payment Summary */}
             <div style={{
-              backgroundColor: 'white',
-              padding: '16px',
-              borderRadius: '8px',
-              border: '2px solid #e5e7eb'
+              background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+              padding: '24px',
+              borderRadius: '16px',
+              border: '3px solid #059669',
+              boxShadow: '0 8px 25px rgba(5, 150, 105, 0.15)'
             }}>
-              <h3 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: '600', color: '#374151' }}>
-                Payment Summary
+              <h3 style={{ 
+                margin: '0 0 20px 0', 
+                fontSize: '24px', 
+                fontWeight: '700', 
+                color: '#166534',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                💰 Payment Summary
               </h3>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                <span style={{ color: '#6b7280' }}>Base Amount:</span>
-                <span style={{ fontWeight: '600' }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                alignItems: 'center',
+                marginBottom: '12px',
+                padding: '12px 16px',
+                background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+                borderRadius: '8px',
+                border: '1px solid #22c55e'
+              }}>
+                <span style={{ color: '#15803d', fontWeight: '600', fontSize: '16px' }}>Base Amount:</span>
+                <span style={{ fontWeight: '700', color: '#166534', fontSize: '18px' }}>
                   Rs.{selectedReservation.amount ? selectedReservation.amount.toFixed(2) : '0.00'}
                 </span>
               </div>
               {selectedReservation.isOvertime && (
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ color: '#dc2626' }}>Overtime ({selectedReservation.overtimeHours?.toFixed(1)}h):</span>
-                  <span style={{ fontWeight: '600', color: '#dc2626' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center',
+                  marginBottom: '12px',
+                  padding: '12px 16px',
+                  background: 'linear-gradient(135deg, #fef2f2 0%, #fecaca 100%)',
+                  borderRadius: '8px',
+                  border: '1px solid #ef4444'
+                }}>
+                  <span style={{ color: '#dc2626', fontWeight: '600', fontSize: '16px' }}>
+                    Overtime ({selectedReservation.overtimeHours?.toFixed(1)}h):
+                  </span>
+                  <span style={{ fontWeight: '700', color: '#dc2626', fontSize: '18px' }}>
                     Rs.{selectedReservation.overtimeAmount ? selectedReservation.overtimeAmount.toFixed(2) : '0.00'}
                   </span>
                 </div>
@@ -1625,11 +2528,15 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
               <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
-                paddingTop: '12px',
-                borderTop: '2px solid #e5e7eb',
-                fontSize: '18px',
-                fontWeight: '700',
-                color: '#059669'
+                alignItems: 'center',
+                padding: '16px 20px',
+                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
+                borderRadius: '12px',
+                fontSize: '20px',
+                fontWeight: '800',
+                color: 'white',
+                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)',
+                border: '2px solid #22c55e'
               }}>
                 <span>Total Amount:</span>
                 <span>Rs.{selectedReservation.calculatedAmount ? selectedReservation.calculatedAmount.toFixed(2) : '0.00'}</span>
@@ -1637,55 +2544,75 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
             </div>
           </div>
 
-          {/* Modal Footer */}
+          {/* Professional Modal Footer */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            paddingTop: '16px',
-            borderTop: '1px solid #e5e7eb'
+            paddingTop: '20px',
+            borderTop: '2px solid #e2e8f0',
+            background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+            margin: '24px -24px -24px -24px',
+            padding: '20px 24px',
+            borderRadius: '0 0 20px 20px'
           }}>
             <button
               onClick={() => {
-                console.log('X button clicked');
                 setShowBillModal(false);
                 setSelectedReservation(null);
               }}
               style={{
-                padding: '10px 20px',
-                backgroundColor: '#6b7280',
+                padding: '12px 24px',
+                background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '12px',
                 fontSize: '14px',
                 fontWeight: '600',
                 cursor: 'pointer',
-                transition: 'background-color 0.2s ease'
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(107, 114, 128, 0.3)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
               }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#4b5563'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#6b7280'}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(107, 114, 128, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(107, 114, 128, 0.3)';
+              }}
             >
-              Cancel
+              ✕ Cancel
             </button>
             <button
               onClick={handleProcessPayment}
               data-process-payment
               style={{
-                padding: '12px 24px',
-                backgroundColor: '#059669',
+                padding: '14px 28px',
+                background: 'linear-gradient(135deg, #059669 0%, #047857 100%)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '6px',
+                borderRadius: '12px',
                 fontSize: '16px',
                 fontWeight: '700',
                 cursor: 'pointer',
-                transition: 'background-color 0.2s ease',
+                transition: 'all 0.3s ease',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(5, 150, 105, 0.3)'
               }}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#047857'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#059669'}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(5, 150, 105, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(5, 150, 105, 0.3)';
+              }}
             >
               💳 Process Payment
             </button>
