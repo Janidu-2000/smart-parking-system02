@@ -130,6 +130,7 @@ const PropertiesPanel = ({ element, updateElement, updateStyle, updateMeta, dele
         <Input label="Width" type="number" value={element.width} onChange={(v) => updateElement(element.id, { width: Number(v) })} isMobile={isMobile} />
         <Input label="Height" type="number" value={element.height} onChange={(v) => updateElement(element.id, { height: Number(v) })} isMobile={isMobile} />
         {isSlot && <Input label="Slot Number" value={element.meta.slotNumber} onChange={(v) => updateMeta(element.id, { slotNumber: v })} isMobile={isMobile} />}
+        {isSlot && <Input label="Location" value={element.meta.location || ''} onChange={(v) => updateMeta(element.id, { location: v })} isMobile={isMobile} />}
         {isSlot && <Input label="Price per Hour ($)" type="number" step="0.01" value={element.meta.price || 0} onChange={(v) => updateMeta(element.id, { price: Number(v) })} isMobile={isMobile} />}
         {isLabel && <Input label="Text" value={element.meta.label} onChange={(v) => updateMeta(element.id, { label: v })} isMobile={isMobile} />}
         

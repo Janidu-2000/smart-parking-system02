@@ -162,7 +162,7 @@ const MessagePage = ({ messages: propMessages = [], onRefreshData }) => {
   const containerStyle = {
     margin: getResponsiveValue('0', '10px 8px', '15px 12px', '20px 0 20px 20px', '20px 0 20px 20px'),
     padding: getResponsiveValue(8, 12, 16, 24, 24),
-    paddingTop: getResponsiveValue(60, 31, 32, 48, 48),
+    paddingTop: getResponsiveValue(65, 68, 72, 68, 72),
     maxWidth: '100%',
     overflowX: 'hidden',
     boxSizing: 'border-box'

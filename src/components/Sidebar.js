@@ -24,32 +24,40 @@ const Sidebar = ({ activeTab, onTabChange, messageCount = 0, pendingBookingCount
   ];
 
   const sidebarWidth = getResponsiveValue(screenSize, {
-    mobile: 64,
-    smallTablet: 64,
-    tablet: 240,
-    large: 240,
-    desktop: 240
+    xs: 60,
+    sm: 64,
+    md: 80,
+    lg: 240,
+    xl: 240,
+    xxl: 260,
+    xxxl: 280
   });
   const fontSize = getResponsiveValue(screenSize, {
-    mobile: 0,
-    smallTablet: 0,
-    tablet: 24,
-    large: 24,
-    desktop: 24
+    xs: 0,
+    sm: 0,
+    md: 0,
+    lg: 24,
+    xl: 24,
+    xxl: 26,
+    xxxl: 28
   });
   const iconSize = getResponsiveValue(screenSize, {
-    mobile: 24,
-    smallTablet: 28,
-    tablet: 32,
-    large: 32,
-    desktop: 32
+    xs: 20,
+    sm: 24,
+    md: 28,
+    lg: 32,
+    xl: 34,
+    xxl: 36,
+    xxxl: 38
   });
   const showOnMobile = getResponsiveValue(screenSize, {
-    mobile: true,
-    smallTablet: true,
-    tablet: false,
-    large: false,
-    desktop: false
+    xs: true,
+    sm: true,
+    md: true,
+    lg: false,
+    xl: false,
+    xxl: false,
+    xxxl: false
   });
   
   return (
@@ -57,56 +65,158 @@ const Sidebar = ({ activeTab, onTabChange, messageCount = 0, pendingBookingCount
       {!showOnMobile && (
         <div style={{ 
           padding: getResponsiveValue(screenSize, {
-            mobile: '0',
-            smallTablet: '0 8px',
-            tablet: '0 32px',
-            large: '0 32px',
-            desktop: '0 32px'
+            xs: '0',
+            sm: '0',
+            md: '0 8px',
+            lg: '0 24px',
+            xl: '0 28px',
+            xxl: '0 32px',
+            xxxl: '0 36px'
           }), 
           marginBottom: getResponsiveValue(screenSize, {
-            mobile: 0,
-            smallTablet: 16,
-            tablet: 40,
-            large: 40,
-            desktop: 40
+            xs: 0,
+            sm: 0,
+            md: 20,
+            lg: 32,
+            xl: 36,
+            xxl: 40,
+            xxxl: 44
           }), 
           display: 'flex', 
           alignItems: 'center', 
           gap: getResponsiveValue(screenSize, {
-            mobile: 0,
-            smallTablet: 0,
-            tablet: 12,
-            large: 12,
-            desktop: 12
+            xs: 0,
+            sm: 0,
+            md: 8,
+            lg: 12,
+            xl: 14,
+            xxl: 16,
+            xxxl: 18
           }), 
-          height: 40, 
+          height: getResponsiveValue(screenSize, {
+            xs: 32,
+            sm: 36,
+            md: 40,
+            lg: 44,
+            xl: 48,
+            xxl: 52,
+            xxxl: 56
+          }), 
           justifyContent: getResponsiveValue(screenSize, {
-            mobile: 'center',
-            smallTablet: 'center',
-            tablet: 'flex-start',
-            large: 'flex-start',
-            desktop: 'flex-start'
+            xs: 'center',
+            sm: 'center',
+            md: 'center',
+            lg: 'flex-start',
+            xl: 'flex-start',
+            xxl: 'flex-start',
+            xxxl: 'flex-start'
           }) 
         }}>
           <div style={{ 
-            width: iconSize, 
-            height: iconSize, 
-            background: '#ef4444', 
-            borderRadius: '8px', 
             display: 'flex', 
+            flexDirection: 'column',
             alignItems: 'center', 
             justifyContent: 'center',
+            gap: getResponsiveValue(screenSize, {
+              xs: 2,
+              sm: 4,
+              md: 6,
+              lg: 8,
+              xl: 10,
+              xxl: 12,
+              xxxl: 14
+            }),
+            marginLeft: getResponsiveValue(screenSize, {
+              xs: 4,
+              sm: 8,
+              md: 12,
+              lg: 16,
+              xl: 20,
+              xxl: 24,
+              xxxl: 28
+            }),
             marginRight: getResponsiveValue(screenSize, {
-              mobile: 0,
-              smallTablet: 0,
-              tablet: 8,
-              large: 8,
-              desktop: 8
-            })
+              xs: 0,
+              sm: 0,
+              md: 0,
+              lg: 8,
+              xl: 10,
+              xxl: 12,
+              xxxl: 14
+            }),
+            position: 'relative'
           }}>
-            <Home size={iconSize * 0.6} color="white" />
+            {/* Logo Icon */}
+            <div style={{ 
+              width: iconSize, 
+              height: iconSize, 
+              background: 'rgba(255, 255, 255, 0.1)', 
+              borderRadius: '8px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              position: 'relative',
+              backdropFilter: 'blur(10px)'
+            }}>
+              {/* Parking Icon Logo */}
+              <svg 
+                width={iconSize * 0.6} 
+                height={iconSize * 0.6} 
+                viewBox="0 0 24 24" 
+                fill="none"
+              >
+                {/* Car/Parking symbol */}
+                <path 
+                  d="M5 11a3 3 0 0 1 3-3h8a3 3 0 0 1 3 3v6a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-1a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v1a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-6z" 
+                  stroke="#ffffff" 
+                  strokeWidth="1.5" 
+                  fill="none" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <circle 
+                  cx="8" 
+                  cy="15" 
+                  r="1.5" 
+                  fill="#ffffff"
+                />
+                <circle 
+                  cx="16" 
+                  cy="15" 
+                  r="1.5" 
+                  fill="#ffffff"
+                />
+                <path 
+                  d="M7 11V8a1 1 0 0 1 1-1h8a1 1 0 0 1 1 1v3" 
+                  stroke="#ffffff" 
+                  strokeWidth="1.5" 
+                  fill="none" 
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </div>
+            
+            {/* SMART PARKING Text */}
+            <span style={{ 
+              fontWeight: 600, 
+              fontSize: getResponsiveValue(screenSize, {
+                xs: 0,
+                sm: 0,
+                md: 0,
+                lg: 14,
+                xl: 15,
+                xxl: 16,
+                xxxl: 17
+              }), 
+              color: '#ffffff', 
+              letterSpacing: 0.5, 
+              whiteSpace: 'nowrap', 
+              textTransform: 'uppercase',
+              textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+            }}>Smart Parking</span>
           </div>
-          <span style={{ fontWeight: 700, fontSize, color: '#2563eb', letterSpacing: 1, whiteSpace: 'nowrap' }}>Smart Parking</span>
         </div>
       )}
       <nav style={{ 
@@ -175,8 +285,8 @@ const Sidebar = ({ activeTab, onTabChange, messageCount = 0, pendingBookingCount
                 large: '12px 32px',
                 desktop: '12px 32px'
               }),
-              background: activeTab === tab.key ? '#2563eb' : 'transparent',
-              color: activeTab === tab.key ? '#fff' : '#1e293b',
+              background: activeTab === tab.key ? 'rgba(255, 255, 255, 0.2)' : 'transparent',
+              color: activeTab === tab.key ? '#ffffff' : '#ffffff',
               border: 'none',
               outline: 'none',
               fontWeight: 500,
@@ -217,7 +327,23 @@ const Sidebar = ({ activeTab, onTabChange, messageCount = 0, pendingBookingCount
                 large: 'none',
                 desktop: 'none'
               }),
-              transition: 'background 0.2s',
+              transition: 'all 0.2s ease',
+              backdropFilter: activeTab === tab.key ? 'blur(10px)' : 'none',
+              border: activeTab === tab.key ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid transparent',
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== tab.key) {
+                e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+                e.target.style.backdropFilter = 'blur(10px)';
+                e.target.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== tab.key) {
+                e.target.style.background = 'transparent';
+                e.target.style.backdropFilter = 'none';
+                e.target.style.border = '1px solid transparent';
+              }
             }}
           >
             {React.cloneElement(tab.icon, { size: getResponsiveValue(screenSize, {
@@ -298,7 +424,7 @@ const Sidebar = ({ activeTab, onTabChange, messageCount = 0, pendingBookingCount
             desktop: '12px 32px'
           }),
           background: 'transparent',
-          color: '#ef4444',
+          color: '#ffffff',
           border: 'none',
           outline: 'none',
           fontWeight: 500,
@@ -319,10 +445,19 @@ const Sidebar = ({ activeTab, onTabChange, messageCount = 0, pendingBookingCount
             large: 32,
             desktop: 32
           }),
-          transition: 'background 0.2s',
+          transition: 'all 0.2s ease',
+          border: '1px solid transparent',
         }}
-        onMouseOver={(e) => e.target.style.background = '#fef2f2'}
-        onMouseOut={(e) => e.target.style.background = 'transparent'}
+        onMouseOver={(e) => {
+          e.target.style.background = 'rgba(255, 255, 255, 0.1)';
+          e.target.style.backdropFilter = 'blur(10px)';
+          e.target.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+        }}
+        onMouseOut={(e) => {
+          e.target.style.background = 'transparent';
+          e.target.style.backdropFilter = 'none';
+          e.target.style.border = '1px solid transparent';
+        }}
       >
         <LogOut size={getResponsiveValue(screenSize, {
           mobile: 18,

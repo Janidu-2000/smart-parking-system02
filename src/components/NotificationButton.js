@@ -134,26 +134,22 @@ const NotificationButton = ({ onNavigateToSection }) => {
 
   const filteredNotifications = getFilteredNotifications();
 
-  // Calculate dropdown position to prevent overflow
+  // Calculate dropdown position to show on the right side of the icon
   const getDropdownPosition = () => {
     if (!buttonRef.current) return { top: '100%', right: '0' };
     
     const buttonRect = buttonRef.current.getBoundingClientRect();
-    const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const dropdownWidth = 320;
     const dropdownHeight = 400; // Estimated max height
     
-    // Check if dropdown would overflow to the right
-    const wouldOverflowRight = buttonRect.right - dropdownWidth < 0;
     // Check if dropdown would overflow to the bottom
     const wouldOverflowBottom = buttonRect.bottom + dropdownHeight > viewportHeight;
     
     return {
       top: wouldOverflowBottom ? 'auto' : '100%',
       bottom: wouldOverflowBottom ? '100%' : 'auto',
-      right: wouldOverflowRight ? '0' : 'auto',
-      left: wouldOverflowRight ? '0' : 'auto',
+      right: '0', // Always align to the right edge of the button
+      left: 'auto',
       maxHeight: wouldOverflowBottom ? `${viewportHeight - buttonRect.top - 20}px` : '400px'
     };
   };
@@ -173,7 +169,7 @@ const NotificationButton = ({ onNavigateToSection }) => {
         onClick={() => setIsOpen(!isOpen)}
         title={isMuted ? 'Notifications muted' : 'Notifications'}
       >
-        <Bell size={20} color="#6b7280" />
+        <Bell size={20} color="#ffffff" />
         
         {totalCount > 0 && (
           <div style={{
@@ -206,7 +202,7 @@ const NotificationButton = ({ onNavigateToSection }) => {
           position: 'absolute',
           ...dropdownPosition,
           width: '320px',
-          zIndex: 1000,
+          zIndex: 1001,
           overflowY: 'auto'
         }}>
           {/* Header with Settings */}

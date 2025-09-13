@@ -20,7 +20,7 @@ import AddCustomerPage from './AddCustomerPage';
 
 import { updateBookingStatusInFirestore, deleteBookingFromFirestore } from '../services/bookingService';
 import styles from '../styles/styles';
-import { useResponsive, getResponsiveStyles } from '../utils/responsive';
+import { useResponsive, getResponsiveStyles, getResponsiveValue } from '../utils/responsive';
 import { calculateDurationSinceApproval, getDurationStatusColor } from '../utils/durationUtils';
 
 const AdminDashboard = ({ 
@@ -233,12 +233,38 @@ const AdminDashboard = ({
 
   const contentAreaStyle = {
     flex: 1,
-    marginLeft: screenSize.isMobile || screenSize.isSmallTablet ? 0 : 240,
-    transition: 'margin-left 0.2s',
-    width: screenSize.isMobile || screenSize.isSmallTablet ? '100%' : 'calc(100% - 240px)',
-    paddingTop: screenSize.isMobile ? 60 : 0, // Add top padding for mobile to account for fixed sidebar
-    minWidth: 0, // Prevent flex item from overflowing
-    overflowX: 'hidden'
+    marginLeft: getResponsiveValue(screenSize, {
+      xs: 0,
+      sm: 0,
+      md: 80,
+      lg: 240,
+      xl: 240,
+      xxl: 260,
+      xxxl: 280
+    }),
+    transition: 'margin-left 0.3s ease',
+    width: getResponsiveValue(screenSize, {
+      xs: '100%',
+      sm: '100%',
+      md: 'calc(100% - 80px)',
+      lg: 'calc(100% - 240px)',
+      xl: 'calc(100% - 240px)',
+      xxl: 'calc(100% - 260px)',
+      xxxl: 'calc(100% - 280px)'
+    }),
+    paddingTop: getResponsiveValue(screenSize, {
+      xs: 65,
+      sm: 68,
+      md: 72,
+      lg: 68,
+      xl: 72,
+      xxl: 76,
+      xxxl: 80
+    }),
+    minWidth: 0,
+    overflowX: 'hidden',
+    position: 'relative',
+    zIndex: 1
   };
 
   const renderDashboard = () => (
@@ -490,7 +516,11 @@ const AdminDashboard = ({
       />
       
       <div style={contentAreaStyle}>
-        <TopBar pageName={pageNames[activeTab]} onNavigateToSection={handleNavigateToSection} />
+        <TopBar 
+          pageName={pageNames[activeTab]} 
+          onNavigateToSection={handleNavigateToSection}
+          currentPath={['Dashboard', pageNames[activeTab]]}
+        />
         {renderContent()}
       </div>
 

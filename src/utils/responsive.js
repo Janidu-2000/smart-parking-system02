@@ -1,24 +1,35 @@
 import { useState, useEffect } from 'react';
 
-// Standard responsive breakpoints
+// Enhanced responsive breakpoints
 export const BREAKPOINTS = {
-  mobile: 480,      // Mobile phones
-  smallTablet: 768, // Small tablets
-  tablet: 1024,     // Tablets
-  largeScreen: 1440, // Large screens
-  desktop: 1920     // Desktop
+  xs: 320,          // Extra small phones
+  sm: 480,          // Small phones
+  md: 768,          // Tablets
+  lg: 1024,         // Small laptops
+  xl: 1280,         // Large laptops
+  xxl: 1536,        // Desktops
+  xxxl: 1920        // Large desktops
 };
 
-// Custom hook for responsive behavior
+// Enhanced responsive hook
 export const useResponsive = () => {
   const [screenSize, setScreenSize] = useState({
     width: window.innerWidth,
     height: window.innerHeight,
-    isMobile: window.innerWidth <= BREAKPOINTS.mobile,
-    isSmallTablet: window.innerWidth <= BREAKPOINTS.smallTablet,
-    isTablet: window.innerWidth <= BREAKPOINTS.tablet,
-    isLargeScreen: window.innerWidth <= BREAKPOINTS.largeScreen,
-    isDesktop: window.innerWidth > BREAKPOINTS.largeScreen
+    // Legacy breakpoints for backward compatibility
+    isMobile: window.innerWidth <= BREAKPOINTS.sm,
+    isSmallTablet: window.innerWidth <= BREAKPOINTS.md,
+    isTablet: window.innerWidth <= BREAKPOINTS.lg,
+    isLargeScreen: window.innerWidth <= BREAKPOINTS.xl,
+    isDesktop: window.innerWidth > BREAKPOINTS.xl,
+    // New enhanced breakpoints
+    isXs: window.innerWidth <= BREAKPOINTS.xs,
+    isSm: window.innerWidth <= BREAKPOINTS.sm,
+    isMd: window.innerWidth <= BREAKPOINTS.md,
+    isLg: window.innerWidth <= BREAKPOINTS.lg,
+    isXl: window.innerWidth <= BREAKPOINTS.xl,
+    isXxl: window.innerWidth <= BREAKPOINTS.xxl,
+    isXxxl: window.innerWidth > BREAKPOINTS.xxl
   });
 
   useEffect(() => {
@@ -27,11 +38,20 @@ export const useResponsive = () => {
       setScreenSize({
         width,
         height: window.innerHeight,
-        isMobile: width <= BREAKPOINTS.mobile,
-        isSmallTablet: width <= BREAKPOINTS.smallTablet,
-        isTablet: width <= BREAKPOINTS.tablet,
-        isLargeScreen: width <= BREAKPOINTS.largeScreen,
-        isDesktop: width > BREAKPOINTS.largeScreen
+        // Legacy breakpoints
+        isMobile: width <= BREAKPOINTS.sm,
+        isSmallTablet: width <= BREAKPOINTS.md,
+        isTablet: width <= BREAKPOINTS.lg,
+        isLargeScreen: width <= BREAKPOINTS.xl,
+        isDesktop: width > BREAKPOINTS.xl,
+        // New enhanced breakpoints
+        isXs: width <= BREAKPOINTS.xs,
+        isSm: width <= BREAKPOINTS.sm,
+        isMd: width <= BREAKPOINTS.md,
+        isLg: width <= BREAKPOINTS.lg,
+        isXl: width <= BREAKPOINTS.xl,
+        isXxl: width <= BREAKPOINTS.xxl,
+        isXxxl: width > BREAKPOINTS.xxl
       });
     };
 
@@ -42,10 +62,24 @@ export const useResponsive = () => {
   return screenSize;
 };
 
-// Responsive value helper function
+// Enhanced responsive value helper function
 export const getResponsiveValue = (screenSize, values) => {
-  const { mobile, smallTablet, tablet, large, desktop } = values;
+  // Support both old and new breakpoint naming
+  const { 
+    mobile, smallTablet, tablet, large, desktop, // Legacy
+    xs, sm, md, lg, xl, xxl, xxxl // New
+  } = values;
   
+  // New breakpoint system (preferred)
+  if (xs !== undefined && screenSize.isXs) return xs;
+  if (sm !== undefined && screenSize.isSm) return sm;
+  if (md !== undefined && screenSize.isMd) return md;
+  if (lg !== undefined && screenSize.isLg) return lg;
+  if (xl !== undefined && screenSize.isXl) return xl;
+  if (xxl !== undefined && screenSize.isXxl) return xxl;
+  if (xxxl !== undefined && screenSize.isXxxl) return xxxl;
+  
+  // Legacy breakpoint system (fallback)
   if (screenSize.isMobile) return mobile;
   if (screenSize.isSmallTablet) return smallTablet;
   if (screenSize.isTablet) return tablet;
@@ -58,18 +92,22 @@ export const getResponsiveStyles = (screenSize) => ({
   // Container styles
   container: {
     margin: getResponsiveValue(screenSize, {
-      mobile: '10px',
-      smallTablet: '15px',
-      tablet: '20px',
-      large: '30px',
-      desktop: '40px'
+      xs: '4px',
+      sm: '5px',
+      md: '6px',
+      lg: '8px',
+      xl: '10px',
+      xxl: '12px',
+      xxxl: '14px'
     }),
     padding: getResponsiveValue(screenSize, {
-      mobile: '12px',
-      smallTablet: '16px',
-      tablet: '20px',
-      large: '24px',
-      desktop: '32px'
+      xs: '6px',
+      sm: '8px',
+      md: '10px',
+      lg: '12px',
+      xl: '14px',
+      xxl: '16px',
+      xxxl: '18px'
     }),
     maxWidth: '100%',
     overflowX: 'hidden'
@@ -530,155 +568,378 @@ export const getResponsiveStyles = (screenSize) => ({
   }
 });
 
-// Sidebar responsive styles
+// Enhanced sidebar responsive styles
 export const getSidebarStyles = (screenSize) => ({
   sidebar: {
     width: getResponsiveValue(screenSize, {
-      mobile: 64,
-      smallTablet: 64,
-      tablet: 240,
-      large: 240,
-      desktop: 240
+      xs: 60,
+      sm: 64,
+      md: 80,
+      lg: 240,
+      xl: 240,
+      xxl: 260,
+      xxxl: 280
     }),
-    background: '#f3f6fb',
+    background: '#1e3a8a',
+    borderRight: getResponsiveValue(screenSize, {
+      xs: 'none',
+      sm: 'none',
+      md: '1px solid rgba(255, 255, 255, 0.1)',
+      lg: '1px solid rgba(255, 255, 255, 0.1)',
+      xl: '1px solid rgba(255, 255, 255, 0.1)',
+      xxl: '1px solid rgba(255, 255, 255, 0.1)',
+      xxxl: '1px solid rgba(255, 255, 255, 0.1)'
+    }),
     height: getResponsiveValue(screenSize, {
-      mobile: '60px',
-      smallTablet: '100vh',
-      tablet: '100vh',
-      large: '100vh',
-      desktop: '100vh'
+      xs: '60px',
+      sm: '60px',
+      md: '100vh',
+      lg: '100vh',
+      xl: '100vh',
+      xxl: '100vh',
+      xxxl: '100vh'
     }),
     position: 'fixed',
     left: 0,
     top: getResponsiveValue(screenSize, {
-      mobile: 'auto',
-      smallTablet: 0,
-      tablet: 0,
-      large: 0,
-      desktop: 0
+      xs: 'auto',
+      sm: 'auto',
+      md: 0,
+      lg: 0,
+      xl: 0,
+      xxl: 0,
+      xxxl: 0
     }),
     bottom: getResponsiveValue(screenSize, {
-      mobile: 0,
-      smallTablet: 'auto',
-      tablet: 'auto',
-      large: 'auto',
-      desktop: 'auto'
+      xs: 0,
+      sm: 0,
+      md: 'auto',
+      lg: 'auto',
+      xl: 'auto',
+      xxl: 'auto',
+      xxxl: 'auto'
     }),
-    zIndex: 100,
+    zIndex: 999,
     padding: getResponsiveValue(screenSize, {
-      mobile: '8px 0',
-      smallTablet: '16px 0',
-      tablet: '32px 0',
-      large: '32px 0',
-      desktop: '32px 0'
+      xs: '6px 0',
+      sm: '8px 0',
+      md: '12px 0',
+      lg: '24px 0',
+      xl: '28px 0',
+      xxl: '32px 0',
+      xxxl: '36px 0'
     }),
     display: 'flex',
     flexDirection: getResponsiveValue(screenSize, {
-      mobile: 'row',
-      smallTablet: 'column',
-      tablet: 'column',
-      large: 'column',
-      desktop: 'column'
+      xs: 'row',
+      sm: 'row',
+      md: 'column',
+      lg: 'column',
+      xl: 'column',
+      xxl: 'column',
+      xxxl: 'column'
     }),
     boxShadow: getResponsiveValue(screenSize, {
-      mobile: '0 -2px 8px 0 rgba(0,0,0,0.03)',
-      smallTablet: '2px 0 8px 0 rgba(0,0,0,0.03)',
-      tablet: '2px 0 8px 0 rgba(0,0,0,0.03)',
-      large: '2px 0 8px 0 rgba(0,0,0,0.03)',
-      desktop: '2px 0 8px 0 rgba(0,0,0,0.03)'
+      xs: '0 -2px 8px 0 rgba(0,0,0,0.1)',
+      sm: '0 -2px 8px 0 rgba(0,0,0,0.1)',
+      md: '2px 0 8px 0 rgba(0,0,0,0.1)',
+      lg: '2px 0 8px 0 rgba(0,0,0,0.1)',
+      xl: '2px 0 8px 0 rgba(0,0,0,0.1)',
+      xxl: '2px 0 8px 0 rgba(0,0,0,0.1)',
+      xxxl: '2px 0 8px 0 rgba(0,0,0,0.1)'
     }),
-    transition: 'width 0.2s',
+    transition: 'width 0.3s ease, height 0.3s ease',
     justifyContent: getResponsiveValue(screenSize, {
-      mobile: 'space-around',
-      smallTablet: 'flex-start',
-      tablet: 'flex-start',
-      large: 'flex-start',
-      desktop: 'flex-start'
+      xs: 'space-around',
+      sm: 'space-around',
+      md: 'flex-start',
+      lg: 'flex-start',
+      xl: 'flex-start',
+      xxl: 'flex-start',
+      xxxl: 'flex-start'
     }),
     alignItems: getResponsiveValue(screenSize, {
-      mobile: 'center',
-      smallTablet: 'stretch',
-      tablet: 'stretch',
-      large: 'stretch',
-      desktop: 'stretch'
+      xs: 'center',
+      sm: 'center',
+      md: 'stretch',
+      lg: 'stretch',
+      xl: 'stretch',
+      xxl: 'stretch',
+      xxxl: 'stretch'
     })
   }
 });
 
-// TopBar responsive styles
+// Enhanced TopBar responsive styles
 export const getTopBarStyles = (screenSize) => ({
   topBar: {
     position: 'fixed',
     top: 0,
-    left: 0,
+    left: getResponsiveValue(screenSize, {
+      xs: 0,
+      sm: 0,
+      md: 80,
+      lg: 240,
+      xl: 240,
+      xxl: 260,
+      xxxl: 280
+    }),
+    right: 0,
     width: getResponsiveValue(screenSize, {
-      mobile: '100vw',
-      smallTablet: '100vw',
-      tablet: 'calc(100vw - 240px)',
-      large: 'calc(100vw - 240px)',
-      desktop: 'calc(100vw - 240px)'
+      xs: '100vw',
+      sm: '100vw',
+      md: 'calc(100vw - 80px)',
+      lg: 'calc(100vw - 240px)',
+      xl: 'calc(100vw - 240px)',
+      xxl: 'calc(100vw - 260px)',
+      xxxl: 'calc(100vw - 280px)'
     }),
     height: getResponsiveValue(screenSize, {
-      mobile: 60,
-      smallTablet: 48,
-      tablet: 48,
-      large: 48,
-      desktop: 48
+      xs: 60,
+      sm: 64,
+      md: 68,
+      lg: 64,
+      xl: 68,
+      xxl: 72,
+      xxxl: 76
     }),
-    background: '#f3f6fb',
-    borderBottom: '1px solid #e5e7eb',
+    background: '#1e3a8a',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    zIndex: 200,
-    boxShadow: '0 1px 4px 0 rgba(0,0,0,0.03)',
-    marginLeft: getResponsiveValue(screenSize, {
-      mobile: 0,
-      smallTablet: 0,
-      tablet: 240,
-      large: 240,
-      desktop: 240
-    }),
-    transition: 'margin-left 0.2s, width 0.2s',
-    paddingRight: getResponsiveValue(screenSize, {
-      mobile: 16,
-      smallTablet: 24,
-      tablet: 32,
-      large: 32,
-      desktop: 32
+    zIndex: 1000,
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)',
+    transition: 'left 0.3s ease, width 0.3s ease',
+    padding: getResponsiveValue(screenSize, {
+      xs: '0 12px',
+      sm: '0 16px',
+      md: '0 20px',
+      lg: '0 24px',
+      xl: '0 28px',
+      xxl: '0 32px',
+      xxxl: '0 36px'
     })
   },
+  
+  // Left Section
+  leftSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    flex: 1,
+    minWidth: 0
+  },
+  
+  breadcrumb: {
+    display: getResponsiveValue(screenSize, {
+      mobile: 'none',
+      smallTablet: 'flex',
+      tablet: 'flex',
+      large: 'flex',
+      desktop: 'flex'
+    }),
+    alignItems: 'center',
+    gap: '4px',
+    marginBottom: '2px',
+    fontSize: '12px',
+    color: '#ffffff'
+  },
+  
+  breadcrumbItem: {
+    fontSize: '12px',
+    color: '#ffffff',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    maxWidth: '100px'
+  },
+  
   title: {
-    fontWeight: 600,
+    fontWeight: 700,
     fontSize: getResponsiveValue(screenSize, {
-      mobile: 16,
-      smallTablet: 17,
-      tablet: 18,
-      large: 18,
-      desktop: 18
+      mobile: 18,
+      smallTablet: 20,
+      tablet: 22,
+      large: 24,
+      desktop: 24
     }),
-    color: '#2563eb',
+    color: '#ffffff',
+    margin: 0,
+    textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)',
+    whiteSpace: 'nowrap',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
+  },
+  
+  
+  // Right Section
+  rightSection: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: getResponsiveValue(screenSize, {
+      mobile: 8,
+      smallTablet: 12,
+      tablet: 16,
+      large: 16,
+      desktop: 16
+    }),
+    flexShrink: 0,
     marginLeft: getResponsiveValue(screenSize, {
-      mobile: 16,
-      smallTablet: 24,
-      tablet: 32,
-      large: 32,
-      desktop: 32
-    }),
-    textAlign: getResponsiveValue(screenSize, {
-      mobile: 'center',
-      smallTablet: 'left',
-      tablet: 'left',
-      large: 'left',
-      desktop: 'left'
-    }),
-    width: getResponsiveValue(screenSize, {
-      mobile: '100%',
-      smallTablet: 'auto',
-      tablet: 'auto',
-      large: 'auto',
-      desktop: 'auto'
+      mobile: 20,
+      smallTablet: 40,
+      tablet: 60,
+      large: 80,
+      desktop: 100
     })
+  },
+  
+  // User Profile Styles
+  userProfile: {
+    position: 'relative'
+  },
+  
+  userButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    padding: '6px 12px',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
+    borderRadius: '25px',
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    backdropFilter: 'blur(10px)',
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      borderColor: 'rgba(255, 255, 255, 0.3)'
+    }
+  },
+  
+  userAvatar: {
+    width: '32px',
+    height: '32px',
+    borderRadius: '50%',
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '12px',
+    fontWeight: '600',
+    color: '#ffffff',
+    border: '2px solid rgba(255, 255, 255, 0.3)'
+  },
+  
+  userInfo: {
+    display: getResponsiveValue(screenSize, {
+      mobile: 'none',
+      smallTablet: 'flex',
+      tablet: 'flex',
+      large: 'flex',
+      desktop: 'flex'
+    }),
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '1px'
+  },
+  
+  userName: {
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#ffffff',
+    whiteSpace: 'nowrap',
+    maxWidth: '120px',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis'
+  },
+  
+  userRole: {
+    fontSize: '11px',
+    color: '#ffffff',
+    textTransform: 'uppercase',
+    letterSpacing: '0.5px'
+  },
+  
+  // User Menu Dropdown
+  userMenu: {
+    position: 'fixed',
+    top: 'auto',
+    bottom: 'auto',
+    right: getResponsiveValue(screenSize, {
+      mobile: '16px',
+      smallTablet: '20px',
+      tablet: '24px',
+      large: '24px',
+      desktop: '24px'
+    }),
+    marginTop: '8px',
+    width: '280px',
+    maxWidth: 'calc(100vw - 32px)',
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    boxShadow: '0 20px 60px rgba(0, 0, 0, 0.25)',
+    border: '1px solid rgba(0, 0, 0, 0.1)',
+    zIndex: 1001,
+    overflow: 'hidden',
+    backdropFilter: 'blur(20px)',
+    transform: 'translateY(0)',
+    animation: 'slideDown 0.2s ease-out'
+  },
+  
+  userMenuHeader: {
+    padding: '20px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    backgroundColor: '#f8fafc'
+  },
+  
+  userAvatarLarge: {
+    width: '48px',
+    height: '48px',
+    borderRadius: '50%',
+    backgroundColor: '#667eea',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    fontSize: '16px',
+    fontWeight: '600',
+    color: '#ffffff'
+  },
+  
+  userMenuName: {
+    fontSize: '16px',
+    fontWeight: '600',
+    color: '#1f2937',
+    marginBottom: '2px'
+  },
+  
+  userMenuEmail: {
+    fontSize: '13px',
+    color: '#6b7280'
+  },
+  
+  userMenuDivider: {
+    height: '1px',
+    backgroundColor: '#e5e7eb',
+    margin: '8px 0'
+  },
+  
+  userMenuItem: {
+    width: '100%',
+    padding: '12px 20px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '12px',
+    backgroundColor: 'transparent',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '14px',
+    color: '#374151',
+    transition: 'background-color 0.2s ease',
+    ':hover': {
+      backgroundColor: '#f3f4f6'
+    }
   }
 });
 

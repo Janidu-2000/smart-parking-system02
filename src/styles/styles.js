@@ -58,11 +58,21 @@ const styles = {
   notificationButton: {
     position: 'relative',
     padding: '8px',
-    backgroundColor: 'transparent',
-    border: 'none',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    border: '1px solid rgba(255, 255, 255, 0.2)',
     borderRadius: '8px',
     cursor: 'pointer',
-    color: '#6b7280'
+    color: '#ffffff',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'all 0.2s ease',
+    backdropFilter: 'blur(10px)',
+    ':hover': {
+      backgroundColor: 'rgba(255, 255, 255, 0.2)',
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+      color: '#ffffff'
+    }
   },
   notificationBadge: {
     position: 'absolute',
@@ -481,7 +491,10 @@ const styles = {
   },
   notificationHeader: {
     padding: '16px',
-    borderBottom: '1px solid #e5e7eb'
+    borderBottom: '1px solid #e5e7eb',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between'
   },
   notificationHeaderContent: {
     display: 'flex',
@@ -491,6 +504,20 @@ const styles = {
   notificationTitle: {
     fontWeight: '600',
     fontSize: '16px'
+  },
+  notificationCloseButton: {
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    padding: '4px',
+    borderRadius: '4px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    transition: 'background-color 0.2s',
+    ':hover': {
+      backgroundColor: '#e5e7eb'
+    }
   },
   notificationList: {
     maxHeight: '384px',

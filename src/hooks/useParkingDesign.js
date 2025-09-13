@@ -67,6 +67,7 @@ export default function useParkingDesign() {
         label: type === 'label' ? 'Label' : '',
         slotNumber: type === 'slot' ? 'S1' : '',
         price: type === 'slot' ? 5.00 : 0, // Default price for parking slots
+        location: type === 'slot' ? '' : '', // Location for parking slots
       },
     };
     setElements((prev) => [...prev, base]);
@@ -132,6 +133,7 @@ export default function useParkingDesign() {
           slotNumber: String(slot.id ?? index + 1),
           price: slot.price ?? 0,
           status: slot.status ?? 'available',
+          location: slot.location ?? '',
           label: '',
         },
       };
@@ -239,6 +241,7 @@ export default function useParkingDesign() {
             ...el.meta,
             status: match.status ?? el.meta.status,
             price: match.price ?? el.meta.price,
+            location: match.location ?? el.meta.location,
           },
         };
       })
