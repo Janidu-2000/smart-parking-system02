@@ -24,13 +24,13 @@ const Sidebar = ({ activeTab, onTabChange, messageCount = 0, pendingBookingCount
   ];
 
   const sidebarWidth = getResponsiveValue(screenSize, {
-    xs: 60,
-    sm: 64,
-    md: 80,
-    lg: 240,
-    xl: 240,
-    xxl: 260,
-    xxxl: 280
+    xs: 56,
+    sm: 60,
+    md: 72,
+    lg: 200,
+    xl: 220,
+    xxl: 240,
+    xxxl: 260
   });
   const fontSize = getResponsiveValue(screenSize, {
     xs: 0,

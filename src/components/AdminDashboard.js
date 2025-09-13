@@ -236,21 +236,21 @@ const AdminDashboard = ({
     marginLeft: getResponsiveValue(screenSize, {
       xs: 0,
       sm: 0,
-      md: 80,
-      lg: 240,
-      xl: 240,
-      xxl: 260,
-      xxxl: 280
+      md: 72,
+      lg: 200,
+      xl: 220,
+      xxl: 240,
+      xxxl: 260
     }),
     transition: 'margin-left 0.3s ease',
     width: getResponsiveValue(screenSize, {
       xs: '100%',
       sm: '100%',
-      md: 'calc(100% - 80px)',
-      lg: 'calc(100% - 240px)',
-      xl: 'calc(100% - 240px)',
-      xxl: 'calc(100% - 260px)',
-      xxxl: 'calc(100% - 280px)'
+      md: 'calc(100% - 72px)',
+      lg: 'calc(100% - 200px)',
+      xl: 'calc(100% - 220px)',
+      xxl: 'calc(100% - 240px)',
+      xxxl: 'calc(100% - 260px)'
     }),
     paddingTop: getResponsiveValue(screenSize, {
       xs: 65,

@@ -182,41 +182,41 @@ const TopBar = ({ pageName, onNavigateToSection, currentPath = [] }) => {
         
         @media (min-width: 769px) and (max-width: 1024px) {
           .topbar-fixed {
-            left: 80px !important;
+            left: 72px !important;
             right: 0 !important;
-            width: calc(100vw - 80px) !important;
+            width: calc(100vw - 72px) !important;
           }
         }
         
         @media (min-width: 1025px) and (max-width: 1280px) {
           .topbar-fixed {
-            left: 240px !important;
+            left: 200px !important;
             right: 0 !important;
-            width: calc(100vw - 240px) !important;
+            width: calc(100vw - 200px) !important;
           }
         }
         
         @media (min-width: 1281px) and (max-width: 1536px) {
           .topbar-fixed {
+            left: 220px !important;
+            right: 0 !important;
+            width: calc(100vw - 220px) !important;
+          }
+        }
+        
+        @media (min-width: 1537px) and (max-width: 1920px) {
+          .topbar-fixed {
             left: 240px !important;
             right: 0 !important;
             width: calc(100vw - 240px) !important;
           }
         }
         
-        @media (min-width: 1537px) and (max-width: 1920px) {
+        @media (min-width: 1921px) {
           .topbar-fixed {
             left: 260px !important;
             right: 0 !important;
             width: calc(100vw - 260px) !important;
-          }
-        }
-        
-        @media (min-width: 1921px) {
-          .topbar-fixed {
-            left: 280px !important;
-            right: 0 !important;
-            width: calc(100vw - 280px) !important;
           }
         }
       `}</style>

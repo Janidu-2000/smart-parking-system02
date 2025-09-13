@@ -572,13 +572,13 @@ export const getResponsiveStyles = (screenSize) => ({
 export const getSidebarStyles = (screenSize) => ({
   sidebar: {
     width: getResponsiveValue(screenSize, {
-      xs: 60,
-      sm: 64,
-      md: 80,
-      lg: 240,
-      xl: 240,
-      xxl: 260,
-      xxxl: 280
+      xs: 56,
+      sm: 60,
+      md: 72,
+      lg: 200,
+      xl: 220,
+      xxl: 240,
+      xxxl: 260
     }),
     background: '#1e3a8a',
     borderRight: getResponsiveValue(screenSize, {
@@ -678,21 +678,21 @@ export const getTopBarStyles = (screenSize) => ({
     left: getResponsiveValue(screenSize, {
       xs: 0,
       sm: 0,
-      md: 80,
-      lg: 240,
-      xl: 240,
-      xxl: 260,
-      xxxl: 280
+      md: 72,
+      lg: 200,
+      xl: 220,
+      xxl: 240,
+      xxxl: 260
     }),
     right: 0,
     width: getResponsiveValue(screenSize, {
       xs: '100vw',
       sm: '100vw',
-      md: 'calc(100vw - 80px)',
-      lg: 'calc(100vw - 240px)',
-      xl: 'calc(100vw - 240px)',
-      xxl: 'calc(100vw - 260px)',
-      xxxl: 'calc(100vw - 280px)'
+      md: 'calc(100vw - 72px)',
+      lg: 'calc(100vw - 200px)',
+      xl: 'calc(100vw - 220px)',
+      xxl: 'calc(100vw - 240px)',
+      xxxl: 'calc(100vw - 260px)'
     }),
     height: getResponsiveValue(screenSize, {
       xs: 60,
