@@ -5,7 +5,8 @@ import {
   Clock, 
   BarChart3, 
   MapPin, 
-  DollarSign
+  DollarSign,
+  Timer
 } from 'lucide-react';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
@@ -20,6 +21,7 @@ import AddCustomerPage from './AddCustomerPage';
 import { updateBookingStatusInFirestore, deleteBookingFromFirestore } from '../services/bookingService';
 import styles from '../styles/styles';
 import { useResponsive, getResponsiveStyles } from '../utils/responsive';
+import { calculateDurationSinceApproval, getDurationStatusColor } from '../utils/durationUtils';
 
 const AdminDashboard = ({ 
   slots, 
@@ -51,9 +53,19 @@ const AdminDashboard = ({
 }) => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [editingBooking, setEditingBooking] = useState(null);
+  const [currentTime, setCurrentTime] = useState(new Date());
   const screenSize = useResponsive();
   const responsiveStyles = getResponsiveStyles(screenSize);
   const navigate = useNavigate();
+
+  // Real-time updates for duration calculation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000); // Update every second
+
+    return () => clearInterval(interval);
+  }, []);
 
   const pageNames = {
     dashboard: 'Dashboard',
@@ -176,11 +188,12 @@ const AdminDashboard = ({
     transition: 'transform 0.2s, box-shadow 0.2s',
     cursor: 'pointer',
     width: '100%',
-    minHeight: screenSize.isMobile ? 80 : screenSize.isSmallTablet ? 90 : screenSize.isTablet ? 100 : 'auto',
+    minHeight: screenSize.isMobile ? 70 : screenSize.isSmallTablet ? 80 : screenSize.isTablet ? 90 : 100,
     display: 'flex',
     alignItems: 'center',
     boxSizing: 'border-box',
-    overflow: 'hidden'
+    overflow: 'hidden',
+    minWidth: screenSize.isMobile ? 120 : screenSize.isSmallTablet ? 140 : screenSize.isTablet ? 160 : 180
   };
 
   const analyticsCardContentStyle = {
@@ -197,7 +210,8 @@ const AdminDashboard = ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    maxWidth: screenSize.isMobile ? '60px' : screenSize.isSmallTablet ? '80px' : screenSize.isTablet ? '100px' : '120px'
+    maxWidth: screenSize.isMobile ? '80px' : screenSize.isSmallTablet ? '100px' : screenSize.isTablet ? '120px' : '140px',
+    fontSize: screenSize.isMobile ? '11px' : screenSize.isSmallTablet ? '12px' : screenSize.isTablet ? '13px' : '14px'
   };
 
   const analyticsCardNumberStyle = {
@@ -205,7 +219,8 @@ const AdminDashboard = ({
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    maxWidth: screenSize.isMobile ? '60px' : screenSize.isSmallTablet ? '80px' : screenSize.isTablet ? '100px' : '120px'
+    maxWidth: screenSize.isMobile ? '80px' : screenSize.isSmallTablet ? '100px' : screenSize.isTablet ? '120px' : '140px',
+    fontSize: screenSize.isMobile ? '16px' : screenSize.isSmallTablet ? '18px' : screenSize.isTablet ? '20px' : '22px'
   };
 
   const mainContainerStyle = {
@@ -240,7 +255,7 @@ const AdminDashboard = ({
                 {designElements?.filter(element => element.type === 'slot').length || 0}
               </p>
             </div>
-            <MapPin size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#3b82f6" style={{ flexShrink: 0 }} />
+            <MapPin size={screenSize.isMobile ? 16 : screenSize.isSmallTablet ? 18 : screenSize.isTablet ? 20 : 22} color="#3b82f6" style={{ flexShrink: 0 }} />
           </div>
         </div>
         
@@ -257,7 +272,7 @@ const AdminDashboard = ({
                 })()}
               </p>
             </div>
-            <MapPin size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#10b981" style={{ flexShrink: 0 }} />
+            <MapPin size={screenSize.isMobile ? 16 : screenSize.isSmallTablet ? 18 : screenSize.isTablet ? 20 : 22} color="#10b981" style={{ flexShrink: 0 }} />
           </div>
         </div>
         
@@ -269,7 +284,7 @@ const AdminDashboard = ({
                 {slots?.filter(slot => slot.status === 'occupied').length || 0}
               </p>
             </div>
-            <Car size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#ef4444" style={{ flexShrink: 0 }} />
+            <Car size={screenSize.isMobile ? 16 : screenSize.isSmallTablet ? 18 : screenSize.isTablet ? 20 : 22} color="#ef4444" style={{ flexShrink: 0 }} />
           </div>
         </div>
         
@@ -281,7 +296,7 @@ const AdminDashboard = ({
                 {slots?.filter(slot => slot.status === 'reserved').length || 0}
               </p>
             </div>
-            <Clock size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#f59e0b" style={{ flexShrink: 0 }} />
+            <Clock size={screenSize.isMobile ? 16 : screenSize.isSmallTablet ? 18 : screenSize.isTablet ? 20 : 22} color="#f59e0b" style={{ flexShrink: 0 }} />
           </div>
         </div>
         
@@ -299,7 +314,19 @@ const AdminDashboard = ({
                 })()}%
               </p>
             </div>
-            <BarChart3 size={screenSize.isMobile ? 20 : screenSize.isSmallTablet ? 24 : screenSize.isTablet ? 28 : 32} color="#3b82f6" style={{ flexShrink: 0 }} />
+            <BarChart3 size={screenSize.isMobile ? 16 : screenSize.isSmallTablet ? 18 : screenSize.isTablet ? 20 : 22} color="#3b82f6" style={{ flexShrink: 0 }} />
+          </div>
+        </div>
+        
+        <div style={analyticsCardStyle}>
+          <div style={analyticsCardContentStyle}>
+            <div>
+              <p style={analyticsCardTextStyle}>Active Bookings</p>
+              <p style={{ ...analyticsCardNumberStyle, color: '#7c3aed' }}>
+                {bookings?.filter(booking => booking.status === 'approved' || booking.status === 'Approved').length || 0}
+              </p>
+            </div>
+            <Timer size={screenSize.isMobile ? 16 : screenSize.isSmallTablet ? 18 : screenSize.isTablet ? 20 : 22} color="#7c3aed" style={{ flexShrink: 0 }} />
           </div>
         </div>
       </div>
@@ -313,6 +340,98 @@ const AdminDashboard = ({
         onUpdateSlot={onUpdateSlot}
         onRefreshData={onRefreshData}
       />
+
+      {/* Active Bookings with Duration */}
+      {bookings?.filter(booking => booking.status === 'approved' || booking.status === 'Approved').length > 0 && (
+        <div style={{
+          ...responsiveStyles.analyticsCard,
+          marginTop: screenSize.isMobile ? '16px' : '24px',
+          padding: screenSize.isMobile ? '16px' : '20px'
+        }}>
+          <h3 style={{
+            ...responsiveStyles.analyticsCardTitle,
+            marginBottom: screenSize.isMobile ? '12px' : '16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '8px'
+          }}>
+            <Timer size={screenSize.isMobile ? 16 : 18} color="#7c3aed" />
+            Active Bookings - Duration Since Approval
+          </h3>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: screenSize.isMobile ? '1fr' : screenSize.isSmallTablet ? '1fr 1fr' : '1fr 1fr 1fr',
+            gap: screenSize.isMobile ? '12px' : '16px'
+          }}>
+            {bookings
+              .filter(booking => booking.status === 'approved' || booking.status === 'Approved')
+              .map(booking => {
+                const duration = calculateDurationSinceApproval(booking.approvedAt || booking.actualCheckInTime, booking.checkOutTime);
+                const statusColor = getDurationStatusColor(duration, booking.duration || 1);
+                
+                return (
+                  <div key={booking.id} style={{
+                    padding: screenSize.isMobile ? '12px' : '16px',
+                    backgroundColor: '#f8fafc',
+                    borderRadius: '8px',
+                    border: '1px solid #e2e8f0',
+                    borderLeft: `4px solid ${statusColor}`
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'flex-start',
+                      marginBottom: '8px'
+                    }}>
+                      <div>
+                        <p style={{
+                          margin: '0 0 4px 0',
+                          fontSize: screenSize.isMobile ? '13px' : '14px',
+                          fontWeight: '600',
+                          color: '#1e293b'
+                        }}>
+                          {booking.customerName || 'Unknown'}
+                        </p>
+                        <p style={{
+                          margin: '0',
+                          fontSize: screenSize.isMobile ? '11px' : '12px',
+                          color: '#64748b'
+                        }}>
+                          Slot {booking.slotId} • {booking.vehicleNumber}
+                        </p>
+                      </div>
+                      <span style={{
+                        padding: '2px 8px',
+                        backgroundColor: statusColor,
+                        color: 'white',
+                        borderRadius: '12px',
+                        fontSize: screenSize.isMobile ? '10px' : '11px',
+                        fontWeight: '600'
+                      }}>
+                        {duration.totalHours <= (booking.duration || 1) * 0.8 ? 'On Time' : 
+                         duration.totalHours <= (booking.duration || 1) ? 'Approaching' : 'Overtime'}
+                      </span>
+                    </div>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '6px'
+                    }}>
+                      <Timer size={screenSize.isMobile ? 12 : 14} style={{ color: statusColor }} />
+                      <span style={{
+                        fontSize: screenSize.isMobile ? '12px' : '13px',
+                        fontWeight: '600',
+                        color: statusColor
+                      }}>
+                        {duration.formatted}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
     </div>
   );
 

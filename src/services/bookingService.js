@@ -113,6 +113,8 @@ export const getBookingsFromFirestore = async () => {
         endDate: data.endDate,
         checkInTime: data.checkInTime,
         checkOutTime: data.checkOutTime,
+        actualCheckInTime: data.actualCheckInTime, // Time when admin approved the reservation
+        approvedAt: data.approvedAt, // Time when admin approved the reservation
         amount: data.amount,
         status: data.status,
         notes: data.notes,
@@ -208,14 +210,18 @@ export const approveBookingInFirestore = async (bookingId) => {
       throw new Error('Unauthorized: Booking does not belong to current parking lot');
     }
     
+    const currentTime = new Date().toISOString();
+    
     const updateData = {
       status: "approved",
-      approvedAt: new Date().toISOString(),
+      approvedAt: currentTime,
+      // Set the actual check-in time when admin approves the reservation
+      actualCheckInTime: currentTime,
       updatedAt: serverTimestamp()
     };
     
     await updateDoc(bookingRef, updateData);
-    console.log('Booking approved in Firestore:', bookingId);
+    console.log('Booking approved in Firestore:', bookingId, 'with check-in time:', currentTime);
     
     return true;
   } catch (error) {

@@ -461,20 +461,16 @@ export const getResponsiveStyles = (screenSize) => ({
   // Analytics grid
   analyticsGrid: {
     display: 'grid',
-    gridTemplateColumns: getResponsiveValue(screenSize, {
-      mobile: '1fr',
-      smallTablet: 'repeat(2, 1fr)',
-      tablet: 'repeat(3, 1fr)',
-      large: 'repeat(4, 1fr)',
-      desktop: 'repeat(5, 1fr)'
-    }),
+    gridTemplateColumns: 'repeat(6, 1fr)',
     gap: getResponsiveValue(screenSize, {
-      mobile: 12,
-      smallTablet: 16,
-      tablet: 20,
-      large: 24,
-      desktop: 28
-    })
+      mobile: 8,
+      smallTablet: 10,
+      tablet: 12,
+      large: 14,
+      desktop: 16
+    }),
+    overflowX: 'auto',
+    minWidth: '100%'
   },
 
   // Analytics card

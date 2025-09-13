@@ -293,7 +293,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
               <div style={{ 
                 width: screenSize.isMobile ? '16px' : '20px', 
                 height: '3px', 
-                backgroundColor: '#eab308' 
+                backgroundColor: '#f59e0b' 
               }}></div>
               <span style={{ 
                 fontSize: screenSize.isMobile ? '12px' : '14px' 
@@ -753,7 +753,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                               color: '#059669',
                               fontSize: screenSize.isMobile ? '13px' : '14px'
                             }}>
-                              ${selectedSlot?.price || 5.00}/hour
+                              Rs{selectedSlot?.price || 5.00}/hour
                             </span>
                           </div>
                           <div>
@@ -779,10 +779,10 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                           color: '#475569'
                         }}>
                           <span style={{ fontWeight: '500' }}>Calculation:</span> 
-                          ${selectedSlot?.price || 5.00} × {bookingForm.endDate 
+                           Rs{selectedSlot?.price || 5.00} × {bookingForm.endDate
                             ? Math.ceil((new Date(bookingForm.endDate) - new Date(bookingForm.startDate)) / (1000 * 60 * 60 * 24)) + 1
                             : bookingForm.duration
-                          } {bookingForm.endDate ? 'days' : 'hours'} = ${totalAmount}
+                          } {bookingForm.endDate ? 'days' : 'hours'} = Rs{totalAmount}
                         </div>
                         <div style={{ 
                           marginTop: '10px', 
@@ -796,7 +796,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                             fontSize: screenSize.isMobile ? '14px' : '16px', 
                             fontWeight: '700'
                           }}>
-                            Total Amount: ${totalAmount}
+                             Total Amount: Rs{totalAmount}
                           </span>
                         </div>
                       </div>

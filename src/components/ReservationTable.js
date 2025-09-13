@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, CheckCircle, XCircle, Filter, Clock, CheckSquare } from 'lucide-react';
+import { Search, Edit, Trash2, CheckCircle, XCircle, Filter, Clock, CheckSquare, Timer } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
+import { calculateDurationSinceApproval, getDurationStatusColor, getDurationStatusText } from '../utils/durationUtils';
 
 const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBookingCancel, onBookingApprove, onBookingDelete, loading = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,6 +16,7 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
   const [sortOrder, setSortOrder] = useState('desc');
   const [activeTab, setActiveTab] = useState('notApproved'); // 'notApproved' or 'approved'
   const [slotPrices, setSlotPrices] = useState({});
+  const [currentTime, setCurrentTime] = useState(new Date());
 
   // Load slot prices from parking design
   useEffect(() => {
@@ -46,6 +48,15 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
     };
 
     loadSlotPrices();
+  }, []);
+
+  // Real-time updates for duration calculation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date());
+    }, 1000); // Update every second
+
+    return () => clearInterval(interval);
   }, []);
 
   // Recalculate amounts when slot prices change
@@ -88,6 +99,11 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
   
   // Use the enhanced booking data directly
   const enhancedBookings = bookings.map((b) => {
+    // Calculate duration since approval for approved bookings
+    const durationSinceApproval = (b.status === 'approved' || b.status === 'Approved') && b.approvedAt 
+      ? calculateDurationSinceApproval(b.approvedAt, b.checkOutTime)
+      : null;
+
     const enhanced = {
       ...b,
       name: b.customerName || b.driver || 'Unknown',
@@ -117,7 +133,10 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
       checkOut: b.checkOutTime ? new Date(b.checkOutTime).toLocaleString() : null,
       status: b.status === 'pending' ? 'Pending' : (b.status === 'approved' ? 'Approved' : b.status === 'active' ? 'Active' : b.status === 'completed' ? 'Completed' : b.status === 'cancelled' ? 'Cancelled' : b.status === 'Reserved' ? 'Reserved' : 'Pending'),
       // Calculate amount based on slot price and duration
-      calculatedAmount: calculateAmount(b)
+      calculatedAmount: calculateAmount(b),
+      // Add duration since approval
+      durationSinceApproval: durationSinceApproval,
+      approvedAt: b.approvedAt
     };
     
     return enhanced;
@@ -404,6 +423,30 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
           <p style={{ fontSize: getResponsiveValue(10, 12, 12, 12, 12), color: '#6b7280', margin: '0 0 2px 0' }}>Check-Out</p>
           <p style={{ fontSize: getResponsiveValue(10, 12, 12, 12, 12), margin: 0 }}>{booking.checkOut || 'N/A'}</p>
         </div>
+        {activeTab === 'approved' && booking.durationSinceApproval && (
+          <div>
+            <p style={{ fontSize: getResponsiveValue(10, 12, 12, 12, 12), color: '#6b7280', margin: '0 0 2px 0' }}>Time Since Approval</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Timer size={getResponsiveValue(10, 12, 12, 12, 12)} 
+                     style={{ color: getDurationStatusColor(booking.durationSinceApproval, booking.duration) }} />
+              <p style={{ 
+                fontSize: getResponsiveValue(10, 12, 12, 12, 12), 
+                margin: 0,
+                color: getDurationStatusColor(booking.durationSinceApproval, booking.duration),
+                fontWeight: '600'
+              }}>
+                {booking.durationSinceApproval.formatted}
+              </p>
+            </div>
+            <p style={{ 
+              fontSize: getResponsiveValue(9, 10, 10, 11, 11), 
+              margin: '2px 0 0 0',
+              color: '#6b7280'
+            }}>
+              {getDurationStatusText(booking.durationSinceApproval, booking.duration)}
+            </p>
+          </div>
+        )}
       </div>
       
       {/* Action Buttons */}
@@ -611,6 +654,7 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
                     <th style={thStyle}>Amount</th>
                     <th style={thStyle}>Check-In & Out</th>
                     <th style={thStyle}>Status</th>
+                    {activeTab === 'approved' && <th style={thStyle}>Time Since Approval</th>}
                     <th style={thStyle}>Action</th>
                 </tr>
               </thead>
@@ -644,6 +688,35 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
                           {booking.status}
                         </span>
                     </td>
+                    {activeTab === 'approved' && (
+                      <td style={tdStyle}>
+                        {booking.durationSinceApproval ? (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <Timer size={getResponsiveValue(12, 14, 14, 14, 14)} 
+                                   style={{ color: getDurationStatusColor(booking.durationSinceApproval, booking.duration) }} />
+                            <div>
+                              <div style={{ 
+                                fontSize: getResponsiveValue(11, 12, 12, 13, 13),
+                                fontWeight: '600',
+                                color: getDurationStatusColor(booking.durationSinceApproval, booking.duration)
+                              }}>
+                                {booking.durationSinceApproval.formatted}
+                              </div>
+                              <div style={{ 
+                                fontSize: getResponsiveValue(9, 10, 10, 11, 11),
+                                color: '#6b7280'
+                              }}>
+                                {getDurationStatusText(booking.durationSinceApproval, booking.duration)}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <span style={{ color: '#9ca3af', fontSize: getResponsiveValue(11, 12, 12, 13, 13) }}>
+                            N/A
+                          </span>
+                        )}
+                      </td>
+                    )}
                       <td style={tdStyle}>
                         <div style={{ 
                           display: 'flex', 

@@ -204,7 +204,7 @@ const ParkingStatusPage = ({ slots, designElements = [], canvas, gridSize, onUpd
 
   const reservedIndicatorStyle = {
     fontSize: getResponsiveValue(12, 14, 16, 16, 16),
-    color: '#eab308',
+    color: '#f59e0b',
     fontWeight: '500',
     marginLeft: getResponsiveValue(0, 12, 12, 12, 12),
     marginTop: getResponsiveValue(4, 0, 0, 0, 0)
@@ -386,7 +386,7 @@ const ParkingStatusPage = ({ slots, designElements = [], canvas, gridSize, onUpd
             <span style={legendTextStyle}>Occupied</span>
           </div>
           <div style={legendItemStyle}>
-            <div style={{ ...legendBarStyle, backgroundColor: '#eab308' }}></div>
+            <div style={{ ...legendBarStyle, backgroundColor: '#f59e0b' }}></div>
             <span style={legendTextStyle}>Reserved</span>
           </div>
         </div>

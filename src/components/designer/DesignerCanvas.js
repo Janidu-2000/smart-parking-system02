@@ -11,7 +11,7 @@ const ElementView = ({ element, isSelected, onClick, slotStatuses = {} }) => {
       switch (status) {
         case 'available': return '#10b981'; // Green
         case 'occupied': return '#ef4444';  // Red
-        case 'reserved': return '#eab308';  // Yellow
+        case 'reserved': return '#f59e0b';  // Yellow
         default: return '#10b981';
       }
     };
@@ -67,7 +67,7 @@ const ElementView = ({ element, isSelected, onClick, slotStatuses = {} }) => {
             borderRadius: 3,
             whiteSpace: 'nowrap'
           }}>
-            ${meta.price}/hr
+             Rs{meta.price}/hr
           </div>
         )}
       </div>

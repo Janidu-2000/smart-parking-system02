@@ -216,9 +216,11 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           checkInTime: selectedReservation.checkInTime || selectedReservation.startTime || new Date().toISOString(),
           checkOutTime: new Date().toISOString(),
           duration: selectedReservation.activeTimeHours || selectedReservation.duration || 0,
+          activeTimeHours: selectedReservation.activeTimeHours || 0,
           
           // Payment Information
           baseAmount: selectedReservation.amount || 0,
+          regularAmount: selectedReservation.regularAmount || 0,
           overtimeAmount: selectedReservation.isOvertime ? (selectedReservation.overtimeHours * 300) : 0,
           totalAmount: selectedReservation.calculatedAmount || 0,
           amount: selectedReservation.calculatedAmount || 0, // For compatibility
@@ -229,7 +231,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           // Overtime Information
           isOvertime: selectedReservation.isOvertime || false,
           overtimeHours: selectedReservation.overtimeHours || 0,
-          requestedDuration: selectedReservation.duration || 1,
+          requestedDuration: selectedReservation.requestedDuration || selectedReservation.duration || 1,
           
           // System Information
           paymentDate: serverTimestamp(),
@@ -302,9 +304,10 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
       'Vehicle Number': payment.vehicleNumber || 'N/A',
       'Slot ID': payment.slotId || 'N/A',
       'Requested Duration (Hours)': payment.requestedDuration || payment.duration || 'N/A',
+      'Active Time (Hours)': payment.activeTimeHours ? payment.activeTimeHours.toFixed(2) : 'N/A',
       'Overtime Hours': payment.overtimeHours || '0',
       'Is Overtime': payment.isOvertime ? 'Yes' : 'No',
-      'Base Amount (Rs.)': payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00',
+      'Reservation Amount (Rs.)': payment.regularAmount ? payment.regularAmount.toFixed(2) : (payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00'),
       'Overtime Amount (Rs.)': payment.overtimeAmount ? payment.overtimeAmount.toFixed(2) : '0.00',
       'Total Amount (Rs.)': payment.totalAmount ? payment.totalAmount.toFixed(2) : payment.amount ? payment.amount.toFixed(2) : '0.00',
       'Check-In Time': payment.checkInTime ? new Date(payment.checkInTime).toLocaleString() : 'N/A',
@@ -335,39 +338,46 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
     document.body.removeChild(link);
   };
 
-  // Filter approved bookings for "Need to Payment" tab and calculate active time
+  // Filter approved bookings for "Need to Payment" tab and calculate charges
   const approvedBookings = bookings.filter(booking => 
     booking.status === 'approved' || booking.status === 'Approved'
   ).map(booking => {
-    // Calculate active time and amount
-    const checkInTime = new Date(booking.checkInTime);
+    // Use approval time (actualCheckInTime) for duration calculation instead of checkInTime
+    const approvalTime = booking.actualCheckInTime || booking.approvedAt || booking.checkInTime;
     const currentTime = new Date();
-    const activeTimeHours = (currentTime - checkInTime) / (1000 * 60 * 60); // Convert to hours
+    const activeTimeHours = (currentTime - new Date(approvalTime)) / (1000 * 60 * 60); // Convert to hours
     
-    // Calculate amount based on active time
+    // Calculate charges: Customer pays FULL reservation duration + overtime
     const baseRate = 200; // Rs.200 per hour
     const overtimeRate = 300; // Rs.300 per hour for overtime
     const requestedDuration = booking.duration || 1;
     
-    let calculatedAmount = 0;
-    if (activeTimeHours <= requestedDuration) {
-      // Within requested time
-      calculatedAmount = activeTimeHours * baseRate;
-    } else {
-      // Overtime
-      const regularAmount = requestedDuration * baseRate;
-      const overtimeHours = activeTimeHours - requestedDuration;
-      const overtimeAmount = overtimeHours * overtimeRate;
-      calculatedAmount = regularAmount + overtimeAmount;
+    // Customer always pays for the FULL requested duration
+    const regularAmount = requestedDuration * baseRate;
+    let overtimeAmount = 0;
+    let overtimeHours = 0;
+    let isOvertime = false;
+    
+    if (activeTimeHours > requestedDuration) {
+      // Overtime - charge additional overtime rate
+      isOvertime = true;
+      overtimeHours = activeTimeHours - requestedDuration;
+      overtimeAmount = overtimeHours * overtimeRate;
     }
+    
+    const calculatedAmount = regularAmount + overtimeAmount;
     
     return {
       ...booking,
       activeTimeHours: Math.round(activeTimeHours * 100) / 100, // Round to 2 decimal places
       calculatedAmount: Math.round(calculatedAmount * 100) / 100,
+      regularAmount: Math.round(regularAmount * 100) / 100,
+      overtimeAmount: Math.round(overtimeAmount * 100) / 100,
       currentCheckOutTime: currentTime.toISOString(),
-      isOvertime: activeTimeHours > requestedDuration,
-      overtimeHours: activeTimeHours > requestedDuration ? Math.round((activeTimeHours - requestedDuration) * 100) / 100 : 0
+      isOvertime: isOvertime,
+      overtimeHours: Math.round(overtimeHours * 100) / 100,
+      requestedDuration: requestedDuration,
+      approvalTime: approvalTime // Store the approval time for reference
     };
   });
 
@@ -698,9 +708,20 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
           )}
         </div>
         <div>
-          <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 4px 0', fontWeight: '500' }}>Base Amount</p>
+          <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 4px 0', fontWeight: '500' }}>Active Time</p>
+          <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: payment.isOvertime ? '#dc2626' : '#059669' }}>
+            {payment.activeTimeHours ? `${payment.activeTimeHours.toFixed(1)}h` : 'N/A'}
+          </p>
+          {payment.isOvertime && (
+            <p style={{ fontSize: 10, color: '#dc2626', margin: '2px 0 0 0', fontWeight: '500' }}>
+              Actual usage
+            </p>
+          )}
+        </div>
+        <div>
+          <p style={{ fontSize: 11, color: '#64748b', margin: '0 0 4px 0', fontWeight: '500' }}>Reservation Amount</p>
           <p style={{ fontSize: 13, fontWeight: 600, margin: 0, color: '#059669' }}>
-            Rs.{payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00'}
+            Rs.{payment.regularAmount ? payment.regularAmount.toFixed(2) : (payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00')}
           </p>
         </div>
         <div>
@@ -1427,7 +1448,17 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                          textTransform: 'uppercase',
                          letterSpacing: '0.5px',
                          borderRight: '1px solid #bbf7d0'
-                       }}>💰 Base Amount</th>
+                       }}>⏰ Active Time</th>
+                       <th style={{
+                         ...responsiveStyles.th,
+                         padding: '16px 20px',
+                         fontSize: '14px',
+                         fontWeight: '700',
+                         color: '#166534',
+                         textTransform: 'uppercase',
+                         letterSpacing: '0.5px',
+                         borderRight: '1px solid #bbf7d0'
+                       }}>💰 Reservation Amount</th>
                        <th style={{
                          ...responsiveStyles.th,
                          padding: '16px 20px',
@@ -1576,6 +1607,32 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                       )}
                     </div>
                   </td>
+                  <td style={{
+                    ...responsiveStyles.td,
+                    padding: '16px 20px',
+                    borderRight: '1px solid #f1f5f9'
+                  }}>
+                    <div style={{ 
+                      fontWeight: '600', 
+                      color: payment.isOvertime ? '#dc2626' : '#059669',
+                      fontSize: '14px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px'
+                    }}>
+                      ⏰ {payment.activeTimeHours ? `${payment.activeTimeHours.toFixed(1)}h` : 'N/A'}
+                    </div>
+                    {payment.isOvertime && (
+                      <div style={{ 
+                        fontSize: '11px', 
+                        color: '#dc2626', 
+                        fontWeight: '600',
+                        marginTop: '2px'
+                      }}>
+                        Actual usage
+                      </div>
+                    )}
+                  </td>
                   <td style={{ 
                     ...responsiveStyles.td, 
                     fontWeight: '700', 
@@ -1584,7 +1641,7 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                     padding: '16px 20px',
                     borderRight: '1px solid #f1f5f9'
                   }}>
-                    💰 Rs.{payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00'}
+                    💰 Rs.{payment.regularAmount ? payment.regularAmount.toFixed(2) : (payment.baseAmount ? payment.baseAmount.toFixed(2) : '0.00')}
                   </td>
                   <td style={{
                     ...responsiveStyles.td,
@@ -2046,9 +2103,9 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                        borderRadius: '8px',
                        border: '1px solid rgba(34, 197, 94, 0.2)'
                      }}>
-                       <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Base Amount:</span>
+                       <span style={{ fontSize: '12px', color: '#15803d', fontWeight: '600' }}>Reservation Amount:</span>
                        <span style={{ fontSize: '16px', fontWeight: '700', color: '#166534' }}>
-                          Rs.{selectedPayment.baseAmount ? selectedPayment.baseAmount.toFixed(2) : '0.00'}
+                          Rs.{selectedPayment.regularAmount ? selectedPayment.regularAmount.toFixed(2) : (selectedPayment.baseAmount ? selectedPayment.baseAmount.toFixed(2) : '0.00')}
                         </span>
                       </div>
                       {selectedPayment.isOvertime && (
@@ -2464,7 +2521,18 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                   borderRadius: '8px',
                   border: '1px solid #f59e0b'
                 }}>
-                  <span style={{ fontWeight: '600', color: '#b45309', fontSize: '14px' }}>Active Time:</span>
+                  <span style={{ fontWeight: '600', color: '#b45309', fontSize: '14px' }}>Requested Duration:</span>
+                  <span style={{ marginLeft: '8px', fontWeight: '700', color: '#92400e', fontSize: '16px' }}>
+                    {selectedReservation.requestedDuration || selectedReservation.duration || 1} hours
+                  </span>
+                </div>
+                <div style={{
+                  padding: '12px 16px',
+                  background: 'linear-gradient(135deg, #fefce8 0%, #fef3c7 100%)',
+                  borderRadius: '8px',
+                  border: '1px solid #f59e0b'
+                }}>
+                  <span style={{ fontWeight: '600', color: '#b45309', fontSize: '14px' }}>Actual Time Used:</span>
                   <span style={{ marginLeft: '8px', fontWeight: '700', color: '#92400e', fontSize: '16px' }}>
                     {selectedReservation.activeTimeHours ? `${selectedReservation.activeTimeHours.toFixed(1)} hours` : 'N/A'}
                   </span>
@@ -2501,9 +2569,14 @@ const PaymentsPage = ({ payments = [], bookings = [], onRefreshData = null }) =>
                 borderRadius: '8px',
                 border: '1px solid #22c55e'
               }}>
-                <span style={{ color: '#15803d', fontWeight: '600', fontSize: '16px' }}>Base Amount:</span>
+                <div>
+                  <span style={{ color: '#15803d', fontWeight: '600', fontSize: '16px' }}>Reservation Duration ({selectedReservation.requestedDuration || selectedReservation.duration || 1}h):</span>
+                  <div style={{ fontSize: '12px', color: '#15803d', marginTop: '2px' }}>
+                    Customer pays for FULL reservation time
+                  </div>
+                </div>
                 <span style={{ fontWeight: '700', color: '#166534', fontSize: '18px' }}>
-                  Rs.{selectedReservation.amount ? selectedReservation.amount.toFixed(2) : '0.00'}
+                  Rs.{selectedReservation.regularAmount ? selectedReservation.regularAmount.toFixed(2) : (selectedReservation.amount ? selectedReservation.amount.toFixed(2) : '0.00')}
                 </span>
               </div>
               {selectedReservation.isOvertime && (
