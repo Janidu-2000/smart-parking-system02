@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, Edit, Trash2, CheckCircle, XCircle, Filter, Clock, CheckSquare, Timer } from 'lucide-react';
+import { Search, Edit, Trash2, CheckCircle, XCircle, Filter, Clock, CheckSquare, Timer, Video } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebaseConfig';
 import { calculateDurationSinceApproval, getDurationStatusColor, getDurationStatusText } from '../utils/durationUtils';
+import TopVehicleCamera from './TopVehicleCamera';
 
 const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBookingCancel, onBookingApprove, onBookingDelete, loading = false }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -17,6 +18,8 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
   const [activeTab, setActiveTab] = useState('notApproved'); // 'notApproved' or 'approved'
   const [slotPrices, setSlotPrices] = useState({});
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [detectedVehicles, setDetectedVehicles] = useState([]);
+  const [showCameraView, setShowCameraView] = useState(false); // For mobile toggle
 
   // Load slot prices from parking design
   useEffect(() => {
@@ -203,6 +206,12 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
   const currentBookings = activeTab === 'notApproved' ? notApprovedBookings : approvedBookings;
   const filteredBookings = getFilteredBookings(currentBookings);
 
+  // Handle vehicle detection from camera
+  const handleVehicleDetected = (vehicle) => {
+    setDetectedVehicles(prev => [vehicle, ...prev.slice(0, 9)]); // Keep last 10 detections
+    console.log('Vehicle detected:', vehicle);
+  };
+
 
   // Enhanced responsive styles for all screen sizes
   const getResponsiveValue = (mobile, smallTablet, tablet, large, desktop) => {
@@ -214,11 +223,11 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
   };
 
   const containerStyle = {
-    margin: getResponsiveValue('10px 8px', '15px 12px', '20px 16px', '20px 0 20px 20px', '20px 0 20px 20px'),
-    padding: getResponsiveValue(12, 16, 20, 24, 24),
+    margin: getResponsiveValue('2px 4px', '4px 8px', '5px 12px', '5px 0 5px 15px', '5px 0 5px 15px'),
+    padding: getResponsiveValue(4, 8, 12, 16, 16),
     maxWidth: '100%',
     overflowX: 'hidden',
-    paddingTop: getResponsiveValue(50, 52, 54, 52, 54)
+    paddingTop: getResponsiveValue(4, 6, 8, 10, 12)
   };
 
   const titleStyle = {
@@ -515,6 +524,44 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
     <div style={containerStyle}>
       <h2 style={titleStyle}>Reservation List</h2>
       
+      {/* Top Camera Section */}
+      <div style={{ 
+        marginBottom: getResponsiveValue(16, 20, 24, 28, 28),
+        display: isMobile ? (showCameraView ? 'block' : 'none') : 'block'
+      }}>
+        <TopVehicleCamera onVehicleDetected={handleVehicleDetected} />
+      </div>
+
+      {/* Mobile Camera Toggle Button */}
+      {isMobile && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          marginBottom: getResponsiveValue(16, 20, 24, 28, 28)
+        }}>
+          <button
+            onClick={() => setShowCameraView(!showCameraView)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              padding: '10px 16px',
+              backgroundColor: showCameraView ? '#ef4444' : '#3b82f6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: '500',
+              transition: 'background-color 0.2s'
+            }}
+          >
+            <Video size={16} />
+            <span>{showCameraView ? 'Hide Camera' : 'Show Camera'}</span>
+          </button>
+        </div>
+      )}
+      
       {/* Tab Navigation */}
       <div style={tabContainerStyle}>
         <button
@@ -613,13 +660,38 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
         </button>
       </div>
 
-      {/* Results Count */}
+      {/* Results Count and Detection Summary */}
       <div style={{ 
-        marginBottom: getResponsiveValue(12, 16, 16, 16, 16), 
-        fontSize: getResponsiveValue(11, 12, 14, 14, 14), 
-        color: '#6b7280' 
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: getResponsiveValue(12, 16, 16, 16, 16),
+        flexWrap: 'wrap',
+        gap: getResponsiveValue(8, 12, 12, 12, 12)
       }}>
-        Showing {filteredBookings.length} of {currentBookings.length} reservation(s)
+        <div style={{ 
+          fontSize: getResponsiveValue(11, 12, 14, 14, 14), 
+          color: '#6b7280' 
+        }}>
+          Showing {filteredBookings.length} of {currentBookings.length} reservation(s)
+        </div>
+        
+        {detectedVehicles.length > 0 && (
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: getResponsiveValue(6, 8, 8, 8, 8),
+            padding: getResponsiveValue('6px 10px', '8px 12px', '8px 12px', '8px 12px', '8px 12px'),
+            backgroundColor: '#f0f9ff',
+            border: '1px solid #bae6fd',
+            borderRadius: '6px',
+            fontSize: getResponsiveValue(11, 12, 12, 12, 12),
+            color: '#0369a1'
+          }}>
+            <Video size={getResponsiveValue(12, 14, 14, 14, 14)} />
+            <span>{detectedVehicles.length} vehicle(s) detected today</span>
+          </div>
+        )}
       </div>
 
       {/* Content */}
