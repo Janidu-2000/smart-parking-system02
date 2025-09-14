@@ -217,7 +217,8 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
     margin: getResponsiveValue('10px 8px', '15px 12px', '20px 16px', '20px 0 20px 20px', '20px 0 20px 20px'),
     padding: getResponsiveValue(12, 16, 20, 24, 24),
     maxWidth: '100%',
-    overflowX: 'hidden'
+    overflowX: 'hidden',
+    paddingTop: getResponsiveValue(50, 52, 54, 52, 54)
   };
 
   const titleStyle = {

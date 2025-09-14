@@ -172,7 +172,8 @@ const AdminDashboard = ({
   const containerStyle = {
     ...responsiveStyles.container,
     minHeight: screenSize.isMobile ? 'calc(100vh - 60px)' : 'auto', // Account for mobile top bar
-    boxSizing: 'border-box'
+    boxSizing: 'border-box',
+    padding: screenSize.isMobile ? '12px 16px' : '16px 24px'
   };
 
   const titleStyle = {
@@ -253,13 +254,13 @@ const AdminDashboard = ({
       xxxl: 'calc(100% - 260px)'
     }),
     paddingTop: getResponsiveValue(screenSize, {
-      xs: 65,
-      sm: 68,
-      md: 72,
-      lg: 68,
-      xl: 72,
-      xxl: 76,
-      xxxl: 80
+      xs: 50,
+      sm: 52,
+      md: 54,
+      lg: 52,
+      xl: 54,
+      xxl: 56,
+      xxxl: 58
     }),
     minWidth: 0,
     overflowX: 'hidden',
