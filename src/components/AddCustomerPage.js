@@ -6,7 +6,7 @@ import { addBookingToFirestore } from '../services/bookingService';
 import { getParkingSlotsWithStatus } from '../services/slotService';
 import { useResponsive, getResponsiveStyles } from '../utils/responsive';
 
-const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdateSlot, onBookingAdded, parkId }) => {
+const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdateSlot, onBookingAdded, bookings = [], parkId }) => {
   const screenSize = useResponsive();
   const responsiveStyles = getResponsiveStyles(screenSize);
   

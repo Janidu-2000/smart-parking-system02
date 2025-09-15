@@ -260,12 +260,58 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
          setIsLoadingPlate(false);
          if (plateResult.status === 'fulfilled' && plateResult.value.success && plateResult.value.detected && plateResult.value.primaryPlate) {
            console.log('Setting plate details:', plateResult.value.primaryPlate);
+           const plateNumber = plateResult.value.primaryPlate.number;
            setCapturedPlateDetails({
-             number: plateResult.value.primaryPlate.number,
+             number: plateNumber,
              confidence: plateResult.value.primaryPlate.confidence,
              region: plateResult.value.primaryPlate.region,
              timestamp: new Date().toLocaleString()
            });
+           
+          // Check if plate matches any pending/reserved booking and auto-approve
+          if (window.autoApproveEnabled && window.bookings && window.bookings.length > 0 && window.handleBookingApprove) {
+            console.log('Checking for plate matches in reservations...');
+            console.log('Detected plate number:', plateNumber);
+            console.log('Available bookings:', window.bookings);
+            
+            const matchingBookings = window.bookings.filter(booking => {
+              const bookingVehicleNumber = booking.vehicleNumber || booking.vehicle_number || '';
+              const isMatch = bookingVehicleNumber.trim().toLowerCase() === plateNumber.trim().toLowerCase();
+              
+              console.log(`Comparing: "${bookingVehicleNumber}" === "${plateNumber}" = ${isMatch}`);
+              console.log(`Booking status: ${booking.status}, ID: ${booking.id}`);
+              
+              return (booking.status === 'Pending' || booking.status === 'Reserved' || booking.status === 'pending' || booking.status === 'reserved') && 
+                     bookingVehicleNumber && 
+                     isMatch;
+            });
+            
+            if (matchingBookings.length > 0) {
+              console.log('Found matching bookings:', matchingBookings);
+              // Auto-approve all matching bookings
+              matchingBookings.forEach(booking => {
+                console.log(`Auto-approving booking ID: ${booking.id} for vehicle ${plateNumber}`);
+                window.handleBookingApprove(booking.id);
+                
+                // Show notification that we found a match
+                alert(`Auto-approved reservation for vehicle number: ${plateNumber}`);
+              });
+              
+              // Show success message
+              setDetectionStatus('detected');
+              setTimeout(() => {
+                setDetectionStatus('idle');
+              }, 2000);
+            } else {
+              console.log('No matching reservations found for plate:', plateNumber);
+              console.log('Available vehicle numbers in bookings:', window.bookings.map(b => b.vehicleNumber || b.vehicle_number));
+            }
+          } else {
+            console.log('Auto-approval feature not available or properly configured');
+            console.log('autoApproveEnabled:', window.autoApproveEnabled);
+            console.log('bookings available:', window.bookings ? window.bookings.length : 0);
+            console.log('handleBookingApprove available:', !!window.handleBookingApprove);
+          }
          } else {
            console.log('No plate detected or detection failed');
            setCapturedPlateDetails({
@@ -655,7 +701,7 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
                    alignItems: 'center',
                    gap: '8px'
                  }}>
-                   License Plate Details (Port 5002)
+                   License Plate Details
                    {isLoadingPlate && (
                      <Loader size={14} style={{ color: '#6b7280', animation: 'spin 1s linear infinite' }} />
                    )}

@@ -67,7 +67,19 @@ const SmartParkingAppContent = () => {
     };
   };
 
-    useEffect(() => {
+    // Set up global window variables for automatic plate recognition approval
+  useEffect(() => {
+    // Make the booking data and approval function available globally
+    window.autoApproveEnabled = true;
+    window.handleBookingApprove = handleBookingApprove;
+  }, []);
+
+  useEffect(() => {
+    // Update global bookings whenever bookings change
+    window.bookings = bookings;
+  }, [bookings]);
+  
+  useEffect(() => {
     // Load slots and bookings from Firestore
     const loadData = async () => {
       try {

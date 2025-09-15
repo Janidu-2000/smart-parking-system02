@@ -486,6 +486,7 @@ const AdminDashboard = ({
             gridSize={gridSize}
             onUpdateSlot={onUpdateSlot}
             onBookingAdded={handleBookingAdded}
+            bookings={bookings}
             parkId={JSON.parse(localStorage.getItem('authUser') || '{}').uid}
           />
         );
