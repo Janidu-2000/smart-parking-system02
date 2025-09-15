@@ -442,7 +442,7 @@ const AddCustomerPage = ({ slots, designElements = [], canvas, gridSize, onUpdat
                         color: '#059669', 
                         fontSize: screenSize.isMobile ? '13px' : '15px' 
                       }}>
-                        ${selectedSlot?.price || 5.00}/hour
+                        Lkr {selectedSlot?.price || 5.00}/hour
                       </span>
                     </div>
                   </div>

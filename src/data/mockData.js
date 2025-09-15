@@ -99,7 +99,7 @@ export const addBooking = (bookingData) => {
     endDate: bookingData.effectiveEndDate,
     checkInTime: new Date().toISOString().slice(0, 19).replace('T', ' '),
     checkOutTime: null,
-    amount: (bookingData.actualDuration || bookingData.duration) * 5, // $5 per hour
+    amount: (bookingData.actualDuration || bookingData.duration) * 5, // Lkr 5 per hour
     status: "active",
     notes: bookingData.notes || ""
   };

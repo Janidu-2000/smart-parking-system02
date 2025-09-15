@@ -36,7 +36,7 @@ const ElementView = ({ element, isSelected, onClick, slotStatuses = {} }) => {
           position: 'relative',
           cursor: 'pointer',
         }}
-        title={`Slot ${meta.slotNumber || 'S1'} - ${slotStatuses[meta.slotNumber] || meta.status || 'available'}${meta.price ? ` - $${meta.price}/hr` : ''}`}
+        title={`Slot ${meta.slotNumber || 'S1'} - ${slotStatuses[meta.slotNumber] || meta.status || 'available'}${meta.price ? ` - Lkr ${meta.price}/hr` : ''}`}
       >
         {/* Slot Number - Left Top Corner */}
         <div style={{ 

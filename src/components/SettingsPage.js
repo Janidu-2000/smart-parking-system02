@@ -107,7 +107,7 @@ const SettingsPage = ({ onOpenDesigner }) => {
   const containerStyle = {
     margin: getResponsiveValue('0', '10px 8px', '15px 12px', '20px 0 20px 20px', '20px 0 20px 20px'),
     padding: getResponsiveValue(8, 12, 16, 24, 24),
-    paddingTop: getResponsiveValue(50, 52, 54, 52, 54), // Reduced top padding to match Dashboard
+    paddingTop: 0, // No top padding - content touches topbar
     maxWidth: '100%',
     overflowX: 'hidden',
     boxSizing: 'border-box'

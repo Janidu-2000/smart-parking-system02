@@ -205,7 +205,7 @@ const ParkingSlotVisual = ({ slot, onClick, flipped = false, showRoad = true }) 
             boxShadow: '0 2px 4px rgba(0,0,0,0.3)',
             zIndex: 10
           }}>
-            ${slot.price}/h
+            Lkr {slot.price}/h
           </div>
         )}
 

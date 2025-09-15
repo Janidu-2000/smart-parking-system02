@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Video, VideoOff, AlertCircle, CheckCircle, XCircle, Camera, Download } from 'lucide-react';
+import { Video, VideoOff, AlertCircle, CheckCircle, XCircle, Camera, Download, SwitchCamera } from 'lucide-react';
 import VehicleDetectionService from '../services/vehicleDetectionService';
 import PlateDetectionService from '../services/plateDetectionService';
 
@@ -11,6 +11,8 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
   const [detectedVehicles, setDetectedVehicles] = useState([]);
   const [apiStatus, setApiStatus] = useState('checking'); // 'checking', 'connected', 'error'
   const [plateApiStatus, setPlateApiStatus] = useState('checking'); // 'checking', 'connected', 'error'
+  const [secondaryPlateApiStatus, setSecondaryPlateApiStatus] = useState('checking'); // 'checking', 'connected', 'error'
+  const [useSecondaryPlateApi, setUseSecondaryPlateApi] = useState(false);
   const [detectionInterval, setDetectionInterval] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [capturedVehicleDetails, setCapturedVehicleDetails] = useState(null);
@@ -22,6 +24,7 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
     startCamera();
     checkApiStatus();
     checkPlateApiStatus();
+    checkSecondaryPlateApiStatus();
     return () => {
       stopCamera();
       if (detectionInterval) {
@@ -47,6 +50,16 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
       setPlateApiStatus(status.accessible ? 'connected' : 'error');
     } catch (error) {
       setPlateApiStatus('error');
+    }
+  };
+  
+  // Check secondary plate detection API connection status
+  const checkSecondaryPlateApiStatus = async () => {
+    try {
+      const status = await PlateDetectionService.getSecondaryApiStatus();
+      setSecondaryPlateApiStatus(status.accessible ? 'connected' : 'error');
+    } catch (error) {
+      setSecondaryPlateApiStatus('error');
     }
   };
 
@@ -157,9 +170,9 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
   };
 
   const getStatusText = () => {
-    if (apiStatus === 'checking' || plateApiStatus === 'checking') return 'Checking APIs...';
-    if (apiStatus === 'error' && plateApiStatus === 'error') return 'APIs Disconnected';
-    if (apiStatus === 'error' || plateApiStatus === 'error') return 'Partial API Connection';
+    if (apiStatus === 'checking' || plateApiStatus === 'checking' || secondaryPlateApiStatus === 'checking') return 'Checking APIs...';
+    if (apiStatus === 'error' && plateApiStatus === 'error' && secondaryPlateApiStatus === 'error') return 'APIs Disconnected';
+    if (apiStatus === 'error' || plateApiStatus === 'error' || secondaryPlateApiStatus === 'error') return 'Partial API Connection';
     
     switch (detectionStatus) {
       case 'detecting': return 'Detecting...';
@@ -167,6 +180,12 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
       case 'error': return 'Detection Error';
       default: return 'Monitoring';
     }
+  };
+  
+  // Toggle between primary and secondary plate detection API
+  const togglePlateApi = () => {
+    setUseSecondaryPlateApi(prev => !prev);
+    console.log(`Switched to ${!useSecondaryPlateApi ? 'secondary' : 'primary'} plate detection API`);
   };
 
   const captureImage = async () => {
@@ -195,10 +214,17 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
        try {
          console.log('Starting vehicle and plate detection for captured image...');
          
+         // Select which plate detection API to use based on user selection
+         const plateDetectionMethod = useSecondaryPlateApi 
+           ? PlateDetectionService.detectPlateFromVideoFrameSecondary(video)
+           : PlateDetectionService.detectPlateFromVideoFrame(video);
+           
+         console.log(`Using ${useSecondaryPlateApi ? 'secondary' : 'primary'} plate detection API`);
+         
          // Run both detections in parallel
          const [vehicleResult, plateResult] = await Promise.allSettled([
            VehicleDetectionService.detectFromVideoFrame(video),
-           PlateDetectionService.detectPlateFromVideoFrame(video)
+           plateDetectionMethod
          ]);
          
          console.log('Vehicle detection result:', vehicleResult);
@@ -313,57 +339,97 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
           </div>
         </div>
         
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-           <div style={{
-             display: 'flex',
-             alignItems: 'center',
-             gap: '8px',
-             fontSize: '12px',
-             color: '#6b7280'
-           }}>
-             <span>HD</span>
-             <span>•</span>
-             <span>30fps</span>
-             <span>•</span>
-             <span style={{ 
-               color: apiStatus === 'connected' ? '#10b981' : apiStatus === 'error' ? '#ef4444' : '#f59e0b' 
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+             <div style={{
+               display: 'flex',
+               alignItems: 'center',
+               gap: '8px',
+               fontSize: '12px',
+               color: '#6b7280'
              }}>
-               Vehicle API: {apiStatus === 'connected' ? 'Connected' : apiStatus === 'error' ? 'Offline' : 'Checking...'}
-             </span>
-             <span>•</span>
-             <span style={{ 
-               color: plateApiStatus === 'connected' ? '#10b981' : plateApiStatus === 'error' ? '#ef4444' : '#f59e0b' 
-             }}>
-               Plate API: {plateApiStatus === 'connected' ? 'Connected' : plateApiStatus === 'error' ? 'Offline' : 'Checking...'}
-             </span>
-           </div>
-          
-          <button
-            onClick={captureImage}
-            style={{
+               <span>HD</span>
+               <span>•</span>
+               <span>30fps</span>
+               <span>•</span>
+               <span style={{ 
+                 color: apiStatus === 'connected' ? '#10b981' : apiStatus === 'error' ? '#ef4444' : '#f59e0b' 
+               }}>
+                 Vehicle API: {apiStatus === 'connected' ? 'Connected' : apiStatus === 'error' ? 'Offline' : 'Checking...'}
+               </span>
+               <span>•</span>
+               <span style={{ 
+                 color: (useSecondaryPlateApi ? secondaryPlateApiStatus : plateApiStatus) === 'connected' 
+                   ? '#10b981' 
+                   : (useSecondaryPlateApi ? secondaryPlateApiStatus : plateApiStatus) === 'error' 
+                   ? '#ef4444' 
+                   : '#f59e0b' 
+               }}>
+                 Plate API {useSecondaryPlateApi ? '(Secondary)' : '(Primary)'}: {
+                   (useSecondaryPlateApi ? secondaryPlateApiStatus : plateApiStatus) === 'connected' 
+                   ? 'Connected' 
+                   : (useSecondaryPlateApi ? secondaryPlateApiStatus : plateApiStatus) === 'error' 
+                   ? 'Offline' 
+                   : 'Checking...'
+                 }
+               </span>
+             </div>
+            
+            <div style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '6px',
-              padding: '6px 12px',
-              backgroundColor: '#3b82f6',
-              color: 'white',
-              border: 'none',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              fontSize: '12px',
-              fontWeight: '500',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseOver={(e) => e.target.style.backgroundColor = '#2563eb'}
-            onMouseOut={(e) => e.target.style.backgroundColor = '#3b82f6'}
-          >
-            <Camera size={14} />
-            Capture
-          </button>
+              gap: '8px'
+            }}>
+              <button
+                onClick={togglePlateApi}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  padding: '6px 10px',
+                  backgroundColor: useSecondaryPlateApi ? '#10b981' : '#6366f1',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = useSecondaryPlateApi ? '#059669' : '#4f46e5'}
+                onMouseOut={(e) => e.target.style.backgroundColor = useSecondaryPlateApi ? '#10b981' : '#6366f1'}
+                title={`Switch to ${useSecondaryPlateApi ? 'primary' : 'secondary'} plate detection API`}
+              >
+                <SwitchCamera size={14} />
+                {useSecondaryPlateApi ? 'API 2' : 'API 1'}
+              </button>
+              
+              <button
+                onClick={captureImage}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '6px 12px',
+                  backgroundColor: '#3b82f6',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  transition: 'background-color 0.2s'
+                }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#2563eb'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#3b82f6'}
+              >
+                <Camera size={14} />
+                Capture
+              </button>
+            </div>
         </div>
       </div>
 
@@ -581,7 +647,7 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
                      fontWeight: '600', 
                      color: '#374151' 
                    }}>
-                     License Plate Details
+                     License Plate Details {useSecondaryPlateApi ? '(Secondary API)' : '(Primary API)'}
                    </h5>
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
@@ -598,6 +664,16 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
                          </span>
                        </div>
                      )}
+                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                       <span style={{ fontSize: '12px', color: '#6b7280' }}>API Used:</span>
+                       <span style={{ 
+                         fontSize: '12px', 
+                         fontWeight: '500', 
+                         color: useSecondaryPlateApi ? '#10b981' : '#6366f1' 
+                       }}>
+                         {useSecondaryPlateApi ? 'Secondary (Port 5002)' : 'Primary (Port 5001)'}
+                       </span>
+                     </div>
                    </div>
                  </div>
                )}

@@ -423,7 +423,7 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
             fontWeight: '600', 
             color: '#059669',
             margin: 0 
-          }}>${booking.calculatedAmount || '0.00'}</p>
+          }}>Lkr {booking.calculatedAmount || '0.00'}</p>
         </div>
         <div>
           <p style={{ fontSize: getResponsiveValue(10, 12, 12, 12, 12), color: '#6b7280', margin: '0 0 2px 0' }}>Check-In</p>
@@ -522,7 +522,6 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
 
   return (
     <div style={containerStyle}>
-      <h2 style={titleStyle}>Reservation List</h2>
       
       {/* Top Camera Section */}
       <div style={{ 
@@ -669,12 +668,12 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
         flexWrap: 'wrap',
         gap: getResponsiveValue(8, 12, 12, 12, 12)
       }}>
-        <div style={{ 
+        {/* <div style={{ 
           fontSize: getResponsiveValue(11, 12, 14, 14, 14), 
           color: '#6b7280' 
         }}>
           Showing {filteredBookings.length} of {currentBookings.length} reservation(s)
-        </div>
+        </div> */}
         
         {detectedVehicles.length > 0 && (
           <div style={{
@@ -749,7 +748,7 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
                           color: '#059669',
                           fontSize: getResponsiveValue(11, 12, 12, 14, 14)
                         }}>
-                          ${booking.calculatedAmount || '0.00'}
+                          Lkr {booking.calculatedAmount || '0.00'}
                         </span>
                       </td>
                       <td style={tdStyle}>

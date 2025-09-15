@@ -14,7 +14,7 @@ export const useParkingData = () => {
     },
     {
       title: "Payment Received",
-      message: "Payment of $15 processed successfully",
+      message: "Payment of Lkr 15 processed successfully",
       time: "5 minutes ago",
       read: false
     }

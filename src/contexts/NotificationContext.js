@@ -114,7 +114,7 @@ export const NotificationProvider = ({ children }) => {
       pendingPayments.forEach(payment => {
         newNotifications.push({
           title: "Payment Pending",
-          message: `${payment.driverName || 'Customer'} - $${payment.amount || 0} (${payment.vehicleNumber || 'Vehicle'})`,
+          message: `${payment.driverName || 'Customer'} - Lkr ${payment.amount || 0} (${payment.vehicleNumber || 'Vehicle'})`,
           time: getTimeAgo(payment.date || new Date()),
           read: false,
           type: "payment",
@@ -128,7 +128,7 @@ export const NotificationProvider = ({ children }) => {
       failedPayments.forEach(payment => {
         newNotifications.push({
           title: "Payment Failed",
-          message: `${payment.driverName || 'Customer'} - $${payment.amount || 0} (${payment.vehicleNumber || 'Vehicle'})`,
+          message: `${payment.driverName || 'Customer'} - Lkr ${payment.amount || 0} (${payment.vehicleNumber || 'Vehicle'})`,
           time: getTimeAgo(payment.date || new Date()),
           read: false,
           type: "payment",
@@ -156,7 +156,7 @@ export const NotificationProvider = ({ children }) => {
       completedBookings.slice(0, 3).forEach(booking => {
         newNotifications.push({
           title: "Booking Completed",
-          message: `${booking.customerName || 'Customer'} - Slot ${booking.slotId} ($${booking.amount || 0})`,
+          message: `${booking.customerName || 'Customer'} - Slot ${booking.slotId} (Lkr ${booking.amount || 0})`,
           time: getTimeAgo(booking.checkOutTime || new Date()),
           read: true,
           type: "reservation",

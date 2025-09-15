@@ -118,7 +118,7 @@ const DriverInterface = ({ slots, onReserveSlot }) => {
                       color: '#6b7280',
                       marginBottom: '8px'
                     }}>
-                      ${slot.price}/hr
+                      Lkr {slot.price}/hr
                     </div>
                     
                     {/* Status */}
@@ -158,7 +158,7 @@ const DriverInterface = ({ slots, onReserveSlot }) => {
                 </div>
                 <div style={styles.detailRow}>
                   <span style={{ fontWeight: '500' }}>Price:</span>
-                  <span style={{ fontWeight: '600', color: '#374151' }}>${selectedSlot.price}/hour</span>
+                  <span style={{ fontWeight: '600', color: '#374151' }}>Lkr {selectedSlot.price}/hour</span>
                 </div>
                 <div style={styles.detailRow}>
                   <span style={{ fontWeight: '500' }}>Duration:</span>
@@ -166,7 +166,7 @@ const DriverInterface = ({ slots, onReserveSlot }) => {
                 </div>
                 <div style={styles.detailRow}>
                   <span style={{ fontWeight: '500' }}>Total:</span>
-                  <span style={{ fontWeight: '600', color: '#374151' }}>${(selectedSlot.price * duration).toFixed(2)}</span>
+                  <span style={{ fontWeight: '600', color: '#374151' }}>Lkr {(selectedSlot.price * duration).toFixed(2)}</span>
                 </div>
               </div>
               
