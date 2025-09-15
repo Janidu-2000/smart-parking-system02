@@ -20,6 +20,8 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
   const [currentTime, setCurrentTime] = useState(new Date());
   const [detectedVehicles, setDetectedVehicles] = useState([]);
   const [showCameraView, setShowCameraView] = useState(false); // For mobile toggle
+  const [notification, setNotification] = useState(null); // For auto-approval notifications
+  const [confirmationPopup, setConfirmationPopup] = useState(null); // For approval confirmation popup
 
   // Load slot prices from parking design
   useEffect(() => {
@@ -206,10 +208,54 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
   const currentBookings = activeTab === 'notApproved' ? notApprovedBookings : approvedBookings;
   const filteredBookings = getFilteredBookings(currentBookings);
 
+  // Helper function to normalize license plate text for comparison
+  const normalizePlate = (plateText) => {
+    if (!plateText) return '';
+    // Remove spaces, dashes, dots and convert to uppercase
+    return plateText.toString().replace(/[\s\-\.]/g, '').toUpperCase();
+  };
+
   // Handle vehicle detection from camera
   const handleVehicleDetected = (vehicle) => {
     setDetectedVehicles(prev => [vehicle, ...prev.slice(0, 9)]); // Keep last 10 detections
     console.log('Vehicle detected:', vehicle);
+    
+    // Check if license plate matches any not approved reservations
+    if (vehicle.licensePlate) {
+      console.log('Detected license plate:', vehicle.licensePlate);
+      
+      const normalizedDetectedPlate = normalizePlate(vehicle.licensePlate);
+      console.log('Normalized detected plate:', normalizedDetectedPlate);
+      
+      console.log('Checking against not approved bookings:', notApprovedBookings.length);
+      
+      // Find matching booking with normalized comparison
+      const matchingBooking = notApprovedBookings.find(booking => {
+        const normalizedBookingPlate = normalizePlate(booking.vehicleNumber);
+        console.log(`Comparing: "${normalizedBookingPlate}" with "${normalizedDetectedPlate}"`);
+        return normalizedBookingPlate === normalizedDetectedPlate;
+      });
+      
+      if (matchingBooking) {
+        console.log('License plate matched with pending reservation:', matchingBooking);
+        
+        try {
+          // Show confirmation popup instead of auto-approving
+          setConfirmationPopup({
+            plateNumber: vehicle.licensePlate,
+            bookingId: matchingBooking.id,
+            customerName: matchingBooking.name,
+            slot: matchingBooking.slot,
+            timestamp: new Date()
+          });
+          
+        } catch (error) {
+          console.error('Error while setting up confirmation popup:', error);
+        }
+      } else {
+        console.log('No matching reservation found for this license plate');
+      }
+    }
   };
 
 
@@ -522,6 +568,161 @@ const ReservationTable = ({ bookings, onBookingStatusUpdate, onBookingEdit, onBo
 
   return (
     <div style={containerStyle}>
+      
+      {/* Approval Confirmation Popup with Overlay */}
+      {confirmationPopup && (
+        <>
+          {/* Semi-transparent overlay */}
+          <div style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            zIndex: 1999
+          }} onClick={() => setConfirmationPopup(null)} />
+          
+          {/* Popup dialog */}
+          <div style={{
+            position: 'fixed',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            backgroundColor: 'white',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            padding: '24px',
+            boxShadow: '0 10px 25px rgba(0,0,0,0.2)',
+            zIndex: 2000,
+            maxWidth: '400px',
+            width: '90%',
+          }}>
+            <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px', 
+            marginBottom: '16px',
+            fontWeight: 700,
+            fontSize: '18px',
+            color: '#1f2937'
+          }}>
+            <CheckCircle size={24} color="#10b981" />
+            License Plate Matched
+          </div>
+          <div style={{
+            fontSize: '15px',
+            color: '#374151',
+            marginBottom: '20px'
+          }}>
+            <p style={{ margin: '8px 0' }}>A vehicle with matching license plate has been detected:</p>
+            <p style={{ margin: '12px 0', fontWeight: 600, fontSize: '16px', backgroundColor: '#f3f4f6', padding: '8px', borderRadius: '4px' }}>
+              <span style={{ display: 'block', fontSize: '13px', color: '#6b7280', marginBottom: '4px' }}>License Plate:</span>
+              {confirmationPopup.plateNumber}
+            </p>
+            <p style={{ margin: '8px 0' }}><strong>Customer:</strong> {confirmationPopup.customerName}</p>
+            <p style={{ margin: '8px 0' }}><strong>Slot:</strong> {confirmationPopup.slot}</p>
+            <p style={{ margin: '12px 0 8px 0' }}>Do you want to approve this reservation?</p>
+          </div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            gap: '12px',
+            marginTop: '16px'
+          }}>
+            <button 
+              onClick={() => setConfirmationPopup(null)}
+              style={{
+                padding: '8px 16px',
+                border: '1px solid #d1d5db',
+                borderRadius: '6px',
+                backgroundColor: '#f9fafb',
+                color: '#374151',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer'
+              }}
+            >
+              Cancel
+            </button>
+            <button 
+              onClick={() => {
+                // Call approve function
+                if (typeof onBookingApprove === 'function' && confirmationPopup.bookingId) {
+                  onBookingApprove(confirmationPopup.bookingId);
+                  
+                  // Show success notification
+                  setNotification({
+                    plateNumber: confirmationPopup.plateNumber,
+                    bookingId: confirmationPopup.bookingId,
+                    customerName: confirmationPopup.customerName,
+                    slot: confirmationPopup.slot,
+                    timestamp: new Date()
+                  });
+                  
+                  // Clear notification after 5 seconds
+                  setTimeout(() => {
+                    setNotification(null);
+                  }, 5000);
+                }
+                setConfirmationPopup(null);
+              }}
+              style={{
+                padding: '8px 16px',
+                border: '1px solid #10b981',
+                borderRadius: '6px',
+                backgroundColor: '#10b981',
+                color: 'white',
+                fontSize: '14px',
+                fontWeight: 500,
+                cursor: 'pointer'
+              }}
+            >
+              Approve Reservation
+            </button>
+          </div>
+          </div>
+        </>
+      )}
+      
+      {/* Notification for Approved Reservation */}
+      {notification && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          backgroundColor: '#dcfce7',
+          border: '1px solid #86efac',
+          borderLeft: '4px solid #10b981',
+          borderRadius: '6px',
+          padding: '16px',
+          boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+          zIndex: 1000,
+          maxWidth: '400px',
+          animation: 'fadeInRight 0.3s ease-out forwards',
+        }}>
+          <div style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            marginBottom: '8px',
+            fontWeight: 600,
+            fontSize: '16px',
+            color: '#065f46'
+          }}>
+            <CheckCircle size={20} />
+            Reservation Approved
+          </div>
+          <div style={{
+            fontSize: '14px',
+            color: '#065f46'
+          }}>
+            <p style={{ margin: '4px 0' }}><strong>Plate Number:</strong> {notification.plateNumber}</p>
+            <p style={{ margin: '4px 0' }}><strong>Customer:</strong> {notification.customerName}</p>
+            <p style={{ margin: '4px 0' }}><strong>Slot:</strong> {notification.slot}</p>
+          </div>
+        </div>
+      )}
       
       {/* Top Camera Section */}
       <div style={{ 

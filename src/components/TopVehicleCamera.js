@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Video, VideoOff, AlertCircle, CheckCircle, XCircle, Camera, Download, SwitchCamera } from 'lucide-react';
+import { Video, VideoOff, AlertCircle, CheckCircle, XCircle, Camera, Download, Loader } from 'lucide-react';
 import VehicleDetectionService from '../services/vehicleDetectionService';
 import PlateDetectionService from '../services/plateDetectionService';
 
@@ -12,11 +12,13 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
   const [apiStatus, setApiStatus] = useState('checking'); // 'checking', 'connected', 'error'
   const [plateApiStatus, setPlateApiStatus] = useState('checking'); // 'checking', 'connected', 'error'
   const [secondaryPlateApiStatus, setSecondaryPlateApiStatus] = useState('checking'); // 'checking', 'connected', 'error'
-  const [useSecondaryPlateApi, setUseSecondaryPlateApi] = useState(false);
+  const [useSecondaryPlateApi, setUseSecondaryPlateApi] = useState(true);
   const [detectionInterval, setDetectionInterval] = useState(null);
   const [capturedImage, setCapturedImage] = useState(null);
   const [capturedVehicleDetails, setCapturedVehicleDetails] = useState(null);
   const [capturedPlateDetails, setCapturedPlateDetails] = useState(null);
+  const [isLoadingVehicle, setIsLoadingVehicle] = useState(false);
+  const [isLoadingPlate, setIsLoadingPlate] = useState(false);
   const canvasRef = useRef(null);
 
   // Initialize camera and check API status on component mount
@@ -182,11 +184,8 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
     }
   };
   
-  // Toggle between primary and secondary plate detection API
-  const togglePlateApi = () => {
-    setUseSecondaryPlateApi(prev => !prev);
-    console.log(`Switched to ${!useSecondaryPlateApi ? 'secondary' : 'primary'} plate detection API`);
-  };
+  // Always use secondary plate detection API
+  // No toggle function needed anymore
 
   const captureImage = async () => {
     if (!videoRef.current || !stream) {
@@ -210,16 +209,22 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
       const imageDataUrl = canvas.toDataURL('image/jpeg', 0.8);
       setCapturedImage(imageDataUrl);
       
+      // Set loading states
+      setIsLoadingVehicle(true);
+      setIsLoadingPlate(true);
+      
+      // Show empty details containers while loading
+      setCapturedVehicleDetails({});
+      setCapturedPlateDetails({});
+      
        // Try to detect vehicle and plate in the captured image
        try {
          console.log('Starting vehicle and plate detection for captured image...');
          
-         // Select which plate detection API to use based on user selection
-         const plateDetectionMethod = useSecondaryPlateApi 
-           ? PlateDetectionService.detectPlateFromVideoFrameSecondary(video)
-           : PlateDetectionService.detectPlateFromVideoFrame(video);
+         // Always use secondary plate detection API
+         const plateDetectionMethod = PlateDetectionService.detectPlateFromVideoFrameSecondary(video);
            
-         console.log(`Using ${useSecondaryPlateApi ? 'secondary' : 'primary'} plate detection API`);
+         console.log('Using secondary plate detection API');
          
          // Run both detections in parallel
          const [vehicleResult, plateResult] = await Promise.allSettled([
@@ -231,6 +236,7 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
          console.log('Plate detection result:', plateResult);
          
          // Process vehicle detection result
+         setIsLoadingVehicle(false);
          if (vehicleResult.status === 'fulfilled' && vehicleResult.value.success && vehicleResult.value.detected && vehicleResult.value.primaryVehicle) {
            console.log('Setting vehicle details:', vehicleResult.value.primaryVehicle);
            setCapturedVehicleDetails({
@@ -251,6 +257,7 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
          }
          
          // Process plate detection result
+         setIsLoadingPlate(false);
          if (plateResult.status === 'fulfilled' && plateResult.value.success && plateResult.value.detected && plateResult.value.primaryPlate) {
            console.log('Setting plate details:', plateResult.value.primaryPlate);
            setCapturedPlateDetails({
@@ -271,6 +278,8 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
          
        } catch (error) {
          console.error('Error detecting vehicle/plate in captured image:', error);
+         setIsLoadingVehicle(false);
+         setIsLoadingPlate(false);
          setCapturedVehicleDetails({
            type: 'Unknown',
            number: 'Detection failed',
@@ -362,16 +371,16 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
                </span>
                <span>•</span>
                <span style={{ 
-                 color: (useSecondaryPlateApi ? secondaryPlateApiStatus : plateApiStatus) === 'connected' 
+                 color: secondaryPlateApiStatus === 'connected' 
                    ? '#10b981' 
-                   : (useSecondaryPlateApi ? secondaryPlateApiStatus : plateApiStatus) === 'error' 
+                   : secondaryPlateApiStatus === 'error' 
                    ? '#ef4444' 
                    : '#f59e0b' 
                }}>
-                 Plate API {useSecondaryPlateApi ? '(Secondary)' : '(Primary)'}: {
-                   (useSecondaryPlateApi ? secondaryPlateApiStatus : plateApiStatus) === 'connected' 
+                 Plate API (Port 5002): {
+                   secondaryPlateApiStatus === 'connected' 
                    ? 'Connected' 
-                   : (useSecondaryPlateApi ? secondaryPlateApiStatus : plateApiStatus) === 'error' 
+                   : secondaryPlateApiStatus === 'error' 
                    ? 'Offline' 
                    : 'Checking...'
                  }
@@ -383,29 +392,6 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
               alignItems: 'center',
               gap: '8px'
             }}>
-              <button
-                onClick={togglePlateApi}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  padding: '6px 10px',
-                  backgroundColor: useSecondaryPlateApi ? '#10b981' : '#6366f1',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  transition: 'background-color 0.2s'
-                }}
-                onMouseOver={(e) => e.target.style.backgroundColor = useSecondaryPlateApi ? '#059669' : '#4f46e5'}
-                onMouseOut={(e) => e.target.style.backgroundColor = useSecondaryPlateApi ? '#10b981' : '#6366f1'}
-                title={`Switch to ${useSecondaryPlateApi ? 'primary' : 'secondary'} plate detection API`}
-              >
-                <SwitchCamera size={14} />
-                {useSecondaryPlateApi ? 'API 2' : 'API 1'}
-              </button>
               
               <button
                 onClick={captureImage}
@@ -603,7 +589,7 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
           padding: '12px'
         }}>
            {/* Vehicle Details Section */}
-           {capturedVehicleDetails && (
+           {capturedImage && (
              <div style={{
                backgroundColor: '#fff',
                padding: '12px',
@@ -615,40 +601,78 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
                  margin: '0 0 12px 0', 
                  fontSize: '14px', 
                  fontWeight: '600', 
-                 color: '#111827' 
+                 color: '#111827',
+                 display: 'flex',
+                 alignItems: 'center',
+                 gap: '8px'
                }}>
                  Vehicle Details
+                 {isLoadingVehicle && (
+                   <Loader size={14} style={{ color: '#6b7280', animation: 'spin 1s linear infinite' }} />
+                 )}
                </h4>
-               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                   <span style={{ fontSize: '12px', color: '#6b7280' }}>Class:</span>
-                   <span style={{ fontSize: '12px', fontWeight: '500', color: '#111827' }}>
-                     {capturedVehicleDetails.type}
-                   </span>
+               
+               {isLoadingVehicle ? (
+                 <div style={{ 
+                   display: 'flex', 
+                   alignItems: 'center', 
+                   justifyContent: 'center',
+                   minHeight: '60px',
+                   color: '#6b7280',
+                   fontSize: '12px'
+                 }}>
+                   Loading vehicle details...
                  </div>
-                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                   <span style={{ fontSize: '12px', color: '#6b7280' }}>Category:</span>
-                   <span style={{ fontSize: '12px', fontWeight: '500', color: '#111827' }}>
-                     {capturedVehicleDetails.category || 'N/A'}
-                   </span>
+               ) : capturedVehicleDetails && (
+                 <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ fontSize: '12px', color: '#6b7280' }}>Class:</span>
+                     <span style={{ fontSize: '12px', fontWeight: '500', color: '#111827' }}>
+                       {capturedVehicleDetails.type}
+                     </span>
+                   </div>
+                   <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                     <span style={{ fontSize: '12px', color: '#6b7280' }}>Category:</span>
+                     <span style={{ fontSize: '12px', fontWeight: '500', color: '#111827' }}>
+                       {capturedVehicleDetails.category || 'N/A'}
+                     </span>
+                   </div>
                  </div>
-               </div>
+               )}
 
                {/* License Plate Details Subsection */}
-               {capturedPlateDetails && (
-                 <div style={{
-                   marginTop: '12px',
-                   paddingTop: '12px',
-                   borderTop: '1px solid #e5e7eb'
+               <div style={{
+                 marginTop: '12px',
+                 paddingTop: '12px',
+                 borderTop: '1px solid #e5e7eb'
+               }}>
+                 <h5 style={{ 
+                   margin: '0 0 8px 0', 
+                   fontSize: '13px', 
+                   fontWeight: '600', 
+                   color: '#374151',
+                   display: 'flex',
+                   alignItems: 'center',
+                   gap: '8px'
                  }}>
-                   <h5 style={{ 
-                     margin: '0 0 8px 0', 
-                     fontSize: '13px', 
-                     fontWeight: '600', 
-                     color: '#374151' 
+                   License Plate Details (Port 5002)
+                   {isLoadingPlate && (
+                     <Loader size={14} style={{ color: '#6b7280', animation: 'spin 1s linear infinite' }} />
+                   )}
+                 </h5>
+                 
+                 {isLoadingPlate ? (
+                   <div style={{ 
+                     display: 'flex', 
+                     alignItems: 'center', 
+                     justifyContent: 'center',
+                     minHeight: '60px',
+                     color: '#6b7280',
+                     fontSize: '12px'
                    }}>
-                     License Plate Details {useSecondaryPlateApi ? '(Secondary API)' : '(Primary API)'}
-                   </h5>
+                     Loading plate details...
+                   </div>
+                 ) : capturedPlateDetails && (
                    <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                        <span style={{ fontSize: '12px', color: '#6b7280' }}>Plate Number:</span>
@@ -664,24 +688,14 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
                          </span>
                        </div>
                      )}
-                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                       <span style={{ fontSize: '12px', color: '#6b7280' }}>API Used:</span>
-                       <span style={{ 
-                         fontSize: '12px', 
-                         fontWeight: '500', 
-                         color: useSecondaryPlateApi ? '#10b981' : '#6366f1' 
-                       }}>
-                         {useSecondaryPlateApi ? 'Secondary (Port 5002)' : 'Primary (Port 5001)'}
-                       </span>
-                     </div>
                    </div>
-                 </div>
-               )}
+                 )}
+               </div>
              </div>
            )}
 
           {/* Detection History Section */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+          {/* <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
             <h4 style={{ 
               margin: '0 0 12px 0', 
               fontSize: '14px', 
@@ -749,7 +763,7 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
                 ))
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
 
@@ -764,6 +778,11 @@ const TopVehicleCamera = ({ onVehicleDetected }) => {
         @keyframes pulse {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.7; }
+        }
+        
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>
